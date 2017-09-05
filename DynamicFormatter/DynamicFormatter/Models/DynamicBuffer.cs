@@ -1,4 +1,5 @@
 ﻿using System;
+using static System.Buffer;
 
 namespace DynamicFormatter.Models
 {
@@ -53,7 +54,7 @@ namespace DynamicFormatter.Models
 		{
 			int lenghtNeeded = point + buffer.Length;
 			TryResize(lenghtNeeded);
-			Array.Copy(buffer, 0, bytes, point, buffer.Length);
+			BlockCopy(buffer, 0, bytes, point, buffer.Length);
 			return point;
 		}
 
@@ -62,7 +63,7 @@ namespace DynamicFormatter.Models
 			get
 			{
 				byte[] result = new byte[size];
-				Array.Copy(bytes, result, size);
+				BlockCopy(bytes, 0 ,result, 0, size);
 				return result;
 			}
 		}
@@ -72,7 +73,7 @@ namespace DynamicFormatter.Models
 			if (bytes.Length < lenghtNeeded)
 			{
 				byte[] nextBuffer = new byte[lenghtNeeded * 2];
-				Array.Copy(bytes, nextBuffer, bytes.Length);
+				BlockCopy(bytes,0, nextBuffer,0, bytes.Length);
 				bytes = nextBuffer;
 				size = lenghtNeeded;
 			}
@@ -96,13 +97,13 @@ namespace DynamicFormatter.Models
 			public byte[] Read()
 			{
 				byte[] readBytes = new byte[lenght];
-				Array.Copy(buffer.bytes, position, readBytes, 0, lenght);
+				BlockCopy(buffer.bytes, position, readBytes, 0, lenght);
 				return readBytes;
 			}
 
 			public void Set(byte[] buffer)
 			{
-				Array.Copy(buffer, 0, this.buffer.bytes, position, lenght);
+				BlockCopy(buffer, 0, this.buffer.bytes, position, lenght);
 			}
 		}
 	}

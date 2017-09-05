@@ -11,11 +11,13 @@ namespace DynamicFormatter.Serializers
 
 		public static BitSerializer GetInstanse(Type t)
 		{
-			if (!innerLIst.ContainsKey(t))
+			BitSerializer instanse;
+			if (!innerLIst.TryGetValue(t,out instanse))
 			{
-				innerLIst.Add(t, new BitSerializer(t));
+				instanse = new BitSerializer(t);
+				innerLIst.Add(t, instanse);
 			}
-			return innerLIst[t];
+			return instanse;
 		}
 
 		internal Func<byte[], object> Deserialize;

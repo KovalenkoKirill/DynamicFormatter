@@ -1,69 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace DynamicFormatter
 {
 	internal static class BaseTypeSizeHelper
 	{
+		static Dictionary<Type, int> basedTypeSize = new Dictionary<Type, int>();
+
+		static BaseTypeSizeHelper()
+		{
+			basedTypeSize.Add(typeof(bool), sizeof(bool));
+			basedTypeSize.Add(typeof(char), sizeof(char));
+			basedTypeSize.Add(typeof(sbyte), sizeof(sbyte));
+			basedTypeSize.Add(typeof(short), sizeof(short));
+			basedTypeSize.Add(typeof(int), sizeof(int));
+			basedTypeSize.Add(typeof(byte), sizeof(byte));
+			basedTypeSize.Add(typeof(ushort), sizeof(ushort));
+			basedTypeSize.Add(typeof(uint), sizeof(uint));
+			basedTypeSize.Add(typeof(ulong), sizeof(ulong));
+			basedTypeSize.Add(typeof(float), sizeof(float));
+			basedTypeSize.Add(typeof(double), sizeof(double));
+			basedTypeSize.Add(typeof(decimal), sizeof(decimal));
+		}
+
 		public static int SizeOfPrimitive(this Type type)
 		{
-			if (type == typeof(bool))
+			int containsSize;
+			if(basedTypeSize.TryGetValue(type,out containsSize))
 			{
-				return sizeof(bool);
-			}
-			else if (type == typeof(char))
-			{
-				return sizeof(char);
-			}
-			else if (type == typeof(sbyte))
-			{
-				return sizeof(sbyte);
-			}
-			else if (type == typeof(short))
-			{
-				return sizeof(short);
-			}
-			else if (type == typeof(int))
-			{
-				return sizeof(int);
-			}
-			else if (type == typeof(long))
-			{
-				return sizeof(long);
-			}
-			else if (type == typeof(byte))
-			{
-				return sizeof(byte);
-			}
-			else if (type == typeof(ushort))
-			{
-				return sizeof(ushort);
-			}
-			else if (type == typeof(uint))
-			{
-				return sizeof(uint);
-			}
-			else if (type == typeof(ulong))
-			{
-				return sizeof(ulong);
-			}
-			else if (type == typeof(float))
-			{
-				return sizeof(float);
-			}
-			else if (type == typeof(double))
-			{
-				return sizeof(double);
-			}
-			else if (type == typeof(decimal))
-			{
-				return sizeof(decimal);
+				return containsSize;
 			}
 			else
 			{
-				return Marshal.SizeOf(type);
+				int size = Marshal.SizeOf(type);
+				basedTypeSize.Add(type, size);
+				return size;
 			}
-			throw new ArgumentException($"Incorect type for SizeOfPrimitive {type.Name}. Use it for only primitive types");
 		}
 	}
 }

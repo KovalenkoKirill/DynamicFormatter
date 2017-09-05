@@ -3,9 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using static DynamicFormatter.Models.DynamicBuffer;
+using static System.Buffer;
+using static DynamicFormatter.ReflectionUtils;
 
 namespace DynamicFormatter.Serializers
 {
@@ -17,24 +20,33 @@ namespace DynamicFormatter.Serializers
 
 		public static DynamicFormatter Instance(Type type)
 		{
-			if (!_instances.ContainsKey(type))
+			DynamicFormatter instanse;
+			if (!_instances.TryGetValue(type,out instanse))
 			{
-				_instances.Add(type, new DynamicFormatter(type));
+				instanse = new DynamicFormatter(type);
+				_instances.Add(type, instanse);
 			}
-			return _instances[type];
+			return instanse;
 		}
 
 		#endregion static instancesBlock
 
-		private static byte[] nullPtrBytres = BitConverter.GetBytes(((short)-1));
+		#region constField
+		private static readonly byte[] nullPtrBytres = BitConverter.GetBytes(((short)-1));
 
-		private static int PtrSize = sizeof(short);
+		private static readonly int PtrSize = sizeof(short);
+
+		#endregion
+
+		#region classFields
 
 		private Func<object, byte[]> _Serialize;
 
 		private Func<byte[], object> _Deserialize;
 
-		private List<MemberInfo> _memberInfo;
+		private List<FieldInfo> _fields;
+
+		private Dictionary<FieldInfo, GetterAndSetter> _accessMethods;
 
 		private Type _type;
 
@@ -53,6 +65,7 @@ namespace DynamicFormatter.Serializers
 				return _isHasReference.Value;
 			}
 		}
+		#endregion
 
 		#region serialize/Desirialize method
 
@@ -75,12 +88,13 @@ namespace DynamicFormatter.Serializers
 			_type = type;
 			if (!_type.IsPrimitive)
 			{
-				_memberInfo = _type.GetMembers().ToList();
-				_memberInfo = _type.GetMembers(
+				_fields = _type.GetMembers(
 						 BindingFlags.NonPublic |
 						 BindingFlags.Public |
 						 BindingFlags.Instance)
-						 .Where(x => x.MemberType == MemberTypes.Field).ToList();
+						 .Where(x => x.MemberType == MemberTypes.Field)
+						 .Cast<FieldInfo>()
+						 .ToList();
 			}
 
 			_size = GetSize();
@@ -101,6 +115,7 @@ namespace DynamicFormatter.Serializers
 			}
 			else
 			{
+				initAccessField();
 				_Serialize = (entity) =>
 				{
 					return ReferenceTypeSerialize(entity);
@@ -112,6 +127,22 @@ namespace DynamicFormatter.Serializers
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void initAccessField()
+		{
+			_accessMethods = new Dictionary<FieldInfo, GetterAndSetter>();
+			foreach (var field in _fields)
+			{
+				_accessMethods.Add(field,
+				new GetterAndSetter()
+				{
+					Getter = CreateInstanceFieldGetter(field),
+					Setter = CreateInstanceFieldSetter(field)
+				});
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int GetSize()
 		{
 			int size = 0;
@@ -123,9 +154,9 @@ namespace DynamicFormatter.Serializers
 			{
 				return PtrSize;
 			}
-			foreach (var innerMember in _memberInfo)
+			foreach (var innerMember in _fields)
 			{
-				var innerMemberType = GetMemberType(innerMember);
+				var innerMemberType = innerMember.FieldType;
 				if (innerMemberType.IsPrimitive)
 				{
 					size += innerMemberType.SizeOfPrimitive();
@@ -155,10 +186,10 @@ namespace DynamicFormatter.Serializers
 
 		private bool FindReferenceType()
 		{
-			var members = _memberInfo;
+			var members = _fields;
 			foreach (var member in members)
 			{
-				Type memberType = GetMemberType(member);
+				Type memberType = member.FieldType;
 
 				if (memberType != null)
 				{
@@ -180,48 +211,15 @@ namespace DynamicFormatter.Serializers
 			return false;
 		}
 
-		private Type GetMemberType(MemberInfo member)
+
+		private object GetValue(object entity, FieldInfo member)
 		{
-			Type memberType = null;
-			if (member.MemberType == MemberTypes.Field)
-			{
-				memberType = ((FieldInfo)member).FieldType;
-			}
-			else if (member.MemberType == MemberTypes.Property)
-			{
-				PropertyInfo propertyInfo = (PropertyInfo)member;
-				memberType = propertyInfo.PropertyType;
-			}
-			return memberType;
+			return _accessMethods[member].Getter.Invoke(entity);
 		}
 
-		private object GetValue(object entity, MemberInfo member)
+		private void SetValue(object entity, object value, FieldInfo member)
 		{
-			if (member.MemberType == MemberTypes.Field)
-			{
-				FieldInfo field = (FieldInfo)member;
-				return field.GetValue(entity);
-			}
-			else if (member.MemberType == MemberTypes.Property)
-			{
-				PropertyInfo propertyInfo = (PropertyInfo)member;
-				return propertyInfo.GetValue(entity);
-			}
-			return null;
-		}
-
-		private void SetValue(object entity, object value, MemberInfo member)
-		{
-			if (member.MemberType == MemberTypes.Field)
-			{
-				FieldInfo field = (FieldInfo)member;
-				field.SetValue(entity, value);
-			}
-			else if (member.MemberType == MemberTypes.Property)
-			{
-				PropertyInfo propertyInfo = (PropertyInfo)member;
-				propertyInfo.SetValue(entity, value);
-			}
+			_accessMethods[member].Setter.Invoke(entity, value);
 		}
 
 		#endregion Reflection Helpers
@@ -246,21 +244,21 @@ namespace DynamicFormatter.Serializers
 			int currentPadding = 0;
 			var ptr = buffer.Alloc(size);
 			byte[] lenghtBytes = BitConverter.GetBytes(array.Length);
-			Array.Copy(lenghtBytes, current, lenghtBytes.Length);
+			BlockCopy(lenghtBytes, 0, current, 0, lenghtBytes.Length);
 			currentPadding += lenghtBytes.Length;
 			for (int i = 0; i < array.Length; i++)
 			{
 				object value = array.GetValue(i);
 				if (value == null) //null ptr
 				{
-					Array.Copy(nullPtrBytres, 0, current, currentPadding, nullPtrBytres.Length);
+					BlockCopy(nullPtrBytres, 0, current, currentPadding, nullPtrBytres.Length);
 					currentPadding += nullPtrBytres.Length;
 				}
 				else if (referenceMaping.ContainsKey(value))
 				{
 					var objectptr = referenceMaping[value];
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
-					Array.Copy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
 				}
@@ -269,7 +267,7 @@ namespace DynamicFormatter.Serializers
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
 					var memberBytes = BitSerializer.Serialize(value);
-					Array.Copy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
 				}
@@ -277,7 +275,7 @@ namespace DynamicFormatter.Serializers
 				{
 					var objectptr = Instance(memberType).ReferenceSerizlize(value, buffer, referenceMaping);
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
-					Array.Copy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
 				}
@@ -305,20 +303,20 @@ namespace DynamicFormatter.Serializers
 			var ptr = buffer.Alloc(size);
 			referenceMaping.Add(Entity, ptr);
 			int currentPadding = 0;
-			foreach (var member in _memberInfo)
+			foreach (var member in _fields)
 			{
-				Type memberType = GetMemberType(member);
+				Type memberType = member.FieldType;
 				object value = GetValue(Entity, member);
 				if (value == null) //null ptr
 				{
-					Array.Copy(nullPtrBytres, 0, current, currentPadding, nullPtrBytres.Length);
+					BlockCopy(nullPtrBytres, 0, current, currentPadding, nullPtrBytres.Length);
 					currentPadding += nullPtrBytres.Length;
 				}
 				else if (referenceMaping.ContainsKey(value))
 				{
 					var objectptr = referenceMaping[value];
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
-					Array.Copy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
 				}
@@ -327,7 +325,7 @@ namespace DynamicFormatter.Serializers
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
 					var memberBytes = BitSerializer.Serialize(value);
-					Array.Copy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
 				}
@@ -335,7 +333,7 @@ namespace DynamicFormatter.Serializers
 				{
 					var objectptr = Instance(memberType).ReferenceSerizlize(value, buffer, referenceMaping);
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
-					Array.Copy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
 				}
@@ -382,7 +380,7 @@ namespace DynamicFormatter.Serializers
 				   (elementType.IsPrimitive || !Instance(elementType).isHasReference))
 				{
 					byte[] memberBuffer = new byte[elementSize];
-					Array.Copy(arrayBytes, positionInByffer, memberBuffer, 0, elementSize);
+					BlockCopy(arrayBytes, positionInByffer, memberBuffer, 0, elementSize);
 					object element = entitySerializer.Deserialize(memberBuffer);
 					entity.SetValue(element, index);
 				}
@@ -423,16 +421,16 @@ namespace DynamicFormatter.Serializers
 
 			byte[] objectBytes = ptr.Read();
 			int bytesRead = 0;
-			foreach (var member in _memberInfo)
+			foreach (var member in _fields)
 			{
-				Type memberType = GetMemberType(member);
+				Type memberType = member.FieldType;
 				if (memberType.IsValueType &&
 				   (memberType.IsPrimitive || !Instance(memberType).isHasReference))
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
 					int size = memberType.SizeOfPrimitive();
 					var currentMemberBytes = new byte[size];
-					Array.Copy(objectBytes, bytesRead, currentMemberBytes, 0, size);
+					BlockCopy(objectBytes, bytesRead, currentMemberBytes, 0, size);
 					bytesRead += size;
 					object value = BitSerializer.Deserialize(currentMemberBytes);
 					SetValue(entity, value, member);

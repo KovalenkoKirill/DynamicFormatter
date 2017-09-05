@@ -58,7 +58,7 @@ namespace PerformanceComparison.Models
 	{
 		[Index(0)]
 		[ProtoMember(1)]
-		public virtual int R { get; set; }
+		public int R { get; set; }
 
 		[Index(1)]
 		[ProtoMember(2)]

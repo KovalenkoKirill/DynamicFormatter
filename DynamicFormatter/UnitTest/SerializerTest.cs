@@ -51,6 +51,21 @@ namespace UnitTest
 		}
 
 		[TestMethod]
+		public void DynamicFormatterClassTest()
+		{
+			var DynamicFormatter = new DynamicFormatter<ClassForTest>();
+			var testEntity = new ClassForTest();
+			var watch = Stopwatch.StartNew();
+			for (int i = 0; i < iterationCount; i++)
+			{
+				var buffer = DynamicFormatter.Serialize(testEntity);
+				var testEintity = DynamicFormatter.Deserialize(buffer);
+			}
+			watch.Stop();
+			Debug.WriteLine($"DynamicSerialize result {watch.ElapsedMilliseconds} ms.");
+		}
+
+		[TestMethod]
 		public void DynamicFormatterStuctTest()
 		{
 			var DynamicFormatter = new DynamicFormatter<TestStruct>();
