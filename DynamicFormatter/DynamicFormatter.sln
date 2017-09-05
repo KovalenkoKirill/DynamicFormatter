@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicFormatter", "DynamicFormatter\DynamicFormatter.csproj", "{99CBC40C-837D-4F21-BF8B-9D1C97E72EDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99CBC40C-837D-4F21-BF8B-9D1C97E72EDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99CBC40C-837D-4F21-BF8B-9D1C97E72EDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99CBC40C-837D-4F21-BF8B-9D1C97E72EDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99CBC40C-837D-4F21-BF8B-9D1C97E72EDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
