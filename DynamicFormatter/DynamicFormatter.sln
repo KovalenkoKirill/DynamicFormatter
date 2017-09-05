@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicFormatter", "Dynamic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sandbox", "sandbox", "{AA8CA47C-B247-45FB-9841-593941027EC6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceComparison", "PerformanceComparison\PerformanceComparison.csproj", "{24367DCD-0B18-4774-A74D-6C35F9636242}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +25,15 @@ Global
 		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34D304AC-5243-4D0C-B2C9-7B3F2671A08E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24367DCD-0B18-4774-A74D-6C35F9636242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24367DCD-0B18-4774-A74D-6C35F9636242}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24367DCD-0B18-4774-A74D-6C35F9636242}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24367DCD-0B18-4774-A74D-6C35F9636242}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{24367DCD-0B18-4774-A74D-6C35F9636242} = {AA8CA47C-B247-45FB-9841-593941027EC6}
 	EndGlobalSection
 EndGlobal
