@@ -7,8 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using static DynamicFormatter.Models.DynamicBuffer;
-using static System.Buffer;
 using static DynamicFormatter.ReflectionUtils;
+using static System.Buffer;
 
 namespace DynamicFormatter.Serializers
 {
@@ -21,7 +21,7 @@ namespace DynamicFormatter.Serializers
 		public static DynamicFormatter Instance(Type type)
 		{
 			DynamicFormatter instanse;
-			if (!_instances.TryGetValue(type,out instanse))
+			if (!_instances.TryGetValue(type, out instanse))
 			{
 				instanse = new DynamicFormatter(type);
 				_instances.Add(type, instanse);
@@ -32,11 +32,12 @@ namespace DynamicFormatter.Serializers
 		#endregion static instancesBlock
 
 		#region constField
+
 		private static readonly byte[] nullPtrBytres = BitConverter.GetBytes(((short)-1));
 
 		private static readonly int PtrSize = sizeof(short);
 
-		#endregion
+		#endregion constField
 
 		#region classFields
 
@@ -44,7 +45,25 @@ namespace DynamicFormatter.Serializers
 
 		private Func<byte[], object> _Deserialize;
 
-		private List<FieldInfo> _fields;
+		private List<FieldInfo> _fields_;
+
+		private List<FieldInfo> _fields
+		{
+			get
+			{
+				if(_fields_ == null)
+				{
+					_fields_ = _type.GetMembers(
+						 BindingFlags.NonPublic |
+						 BindingFlags.Public |
+						 BindingFlags.Instance)
+						 .Where(x => x.MemberType == MemberTypes.Field)
+						 .Cast<FieldInfo>()
+						 .ToList();
+				}
+				return _fields_;
+			}
+		}
 
 		private Dictionary<FieldInfo, GetterAndSetter> _accessMethods;
 
@@ -65,7 +84,8 @@ namespace DynamicFormatter.Serializers
 				return _isHasReference.Value;
 			}
 		}
-		#endregion
+
+		#endregion classFields
 
 		#region serialize/Desirialize method
 
@@ -86,16 +106,6 @@ namespace DynamicFormatter.Serializers
 		private DynamicFormatter(Type type)
 		{
 			_type = type;
-			if (!_type.IsPrimitive)
-			{
-				_fields = _type.GetMembers(
-						 BindingFlags.NonPublic |
-						 BindingFlags.Public |
-						 BindingFlags.Instance)
-						 .Where(x => x.MemberType == MemberTypes.Field)
-						 .Cast<FieldInfo>()
-						 .ToList();
-			}
 
 			_size = GetSize();
 
@@ -110,7 +120,11 @@ namespace DynamicFormatter.Serializers
 				_Deserialize = (buffer) =>
 				{
 					BitSerializer bitSerializer = BitSerializer.GetInstanse(_type);
+#if USE_UNSAFE
+					return bitSerializer.Deserialize(buffer,0);
+#else
 					return bitSerializer.Deserialize(buffer);
+#endif
 				};
 			}
 			else
@@ -210,7 +224,6 @@ namespace DynamicFormatter.Serializers
 			}
 			return false;
 		}
-
 
 		private object GetValue(object entity, FieldInfo member)
 		{
@@ -429,10 +442,15 @@ namespace DynamicFormatter.Serializers
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
 					int size = memberType.SizeOfPrimitive();
+#if USE_UNSAFE
+					object value = BitSerializer.Deserialize(objectBytes, bytesRead);
+
+#else
 					var currentMemberBytes = new byte[size];
 					BlockCopy(objectBytes, bytesRead, currentMemberBytes, 0, size);
-					bytesRead += size;
 					object value = BitSerializer.Deserialize(currentMemberBytes);
+#endif
+					bytesRead += size;
 					SetValue(entity, value, member);
 				}
 				else

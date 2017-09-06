@@ -1,5 +1,6 @@
 ﻿using DynamicFormatter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -22,10 +23,20 @@ namespace UnitTest
 		}
 
 		[TestMethod]
-		public void DynamicFormatterBaseTypeTest()
+		public void DynamicFormatterDateTimeTest()
 		{
-			var DynamicFormatter = new DynamicFormatter<int>();
-			var testEntity = 50;
+			DateTime time = DateTime.Now;
+			var DynamicFormatter = new DynamicFormatter<DateTime>();
+			var buffer = DynamicFormatter.Serialize(time);
+			var resultTime = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(time, resultTime);
+		}
+
+		[TestMethod]
+		public void DynamicFormatterPerformanceTest()
+		{
+			var DynamicFormatter = new DynamicFormatter<ClassForTest>();
+			var testEntity = new ClassForTest();
 			var watch = Stopwatch.StartNew();
 			for (int i = 0; i < iterationCount; i++)
 			{

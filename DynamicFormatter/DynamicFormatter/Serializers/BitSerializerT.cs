@@ -11,7 +11,11 @@
 
 		public T Deserialize(byte[] buffer)
 		{
+#if USE_UNSAFE
+			return (T)innerSerializer.Deserialize(buffer,0);
+#else
 			return (T)innerSerializer.Deserialize(buffer);
+#endif
 		}
 
 		public byte[] Serialize(T entity)
