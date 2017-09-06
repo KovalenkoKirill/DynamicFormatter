@@ -44,7 +44,6 @@
   <ItemGroup>
     <Compile Include="enums\StartupBehavior.cs" />
     <Compile Include="Extentions\BaseTypeSizeHelper.cs" />
-    <Compile Include="Extentions\ObjectReference.cs" />
     <Compile Include="Extentions\ReflectionUtils.cs" />
     <Compile Include="interfaces\ISerializer.cs" />
     <Compile Include="Models\DynamicBuffer.cs" />

@@ -4,7 +4,6 @@ using UnitTest.Models;
 using System.Reflection;
 using System.Linq;
 using DynamicFormatter;
-using DynamicFormatter.Extentions;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
@@ -65,12 +64,6 @@ namespace UnitTest
 			return BitConverter.GetBytes((int)Convert.ChangeType(entity, typeof(int)));
 		}
 
-		public struct color
-		{
-			public int z;
-
-			public int v;
-		}
 		public unsafe byte[] UnsafeCast(object entity)
 		{
 			int val = (int)entity;
