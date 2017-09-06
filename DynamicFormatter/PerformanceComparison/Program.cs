@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using ZeroFormatter;
 
 namespace PerformanceComparison
@@ -36,6 +37,7 @@ namespace PerformanceComparison
 				Console.WriteLine($"2: BaseClass (struct with only value types)");
 				Console.WriteLine($"3: Just int");
 				Console.WriteLine($"4: Class with inner class");
+				Console.WriteLine($"5: CrossReference class");
 				try
 				{
 					line = Console.ReadKey().KeyChar.ToString();
@@ -63,7 +65,7 @@ namespace PerformanceComparison
 						case "4":
 							SerializeTest<ClassWithInnerReference>(new ClassWithInnerReference()
 							{
-								B = 323,
+								B = int.MaxValue,
 								G = 4213,
 								R = 123,
 								InnerClass = new BaseClass()
@@ -73,6 +75,9 @@ namespace PerformanceComparison
 									B = 12
 								}
 							}, iterationCount);
+							break;
+						case "5":
+							SerializeTest<CrossReferenceClass>(new CrossReferenceClass(),iterationCount);
 							break;
 					}
 				}
@@ -87,6 +92,7 @@ namespace PerformanceComparison
 		{
 			long serilizationResult = 0;
 			long desirilizationResult = 0;
+			int objectSize = 0;
 
 			var watch = new Stopwatch();
 
@@ -100,6 +106,7 @@ namespace PerformanceComparison
 				dynamicBytes = dynamicFormatter.Serialize(entity);
 			}
 			watch.Stop();
+			objectSize = dynamicBytes.Length;
 			serilizationResult = watch.ElapsedMilliseconds;
 
 			watch = Stopwatch.StartNew();
@@ -114,34 +121,44 @@ namespace PerformanceComparison
 			Console.WriteLine($"Serilization: {serilizationResult}ms");
 			Console.WriteLine($"Desirilization: {desirilizationResult}ms");
 			Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
+			Console.WriteLine($"Size: {objectSize} bytes.");
 
 			#endregion dynamicFormatter
 
 
 			#region json
 
-			watch = Stopwatch.StartNew();
-
-			string json = string.Empty;
-			for (int i = 0; i < iterationCount; i++)
+			try
 			{
-				json = JsonConvert.SerializeObject(entity);
-			}
-			watch.Stop();
-			serilizationResult = watch.ElapsedMilliseconds;
 
-			watch = Stopwatch.StartNew();
-			for (int i = 0; i < iterationCount; i++)
-			{
-				var obj = JsonConvert.DeserializeObject<T>(json);
+				watch = Stopwatch.StartNew();
+
+				string json = string.Empty;
+				for (int i = 0; i < iterationCount; i++)
+				{
+					json = JsonConvert.SerializeObject(entity);
+				}
+				watch.Stop();
+				serilizationResult = watch.ElapsedMilliseconds;
+				objectSize = Encoding.Default.GetBytes(json).Length;
+				watch = Stopwatch.StartNew();
+				for (int i = 0; i < iterationCount; i++)
+				{
+					var obj = JsonConvert.DeserializeObject<T>(json);
+				}
+				watch.Stop();
+				desirilizationResult = watch.ElapsedMilliseconds;
+				Console.WriteLine
+				($"JsonConvert reuslt for {entity.GetType().Name} and {iterationCount} iterations");
+				Console.WriteLine($"Serilization: {serilizationResult}ms");
+				Console.WriteLine($"Desirilization: {desirilizationResult}ms");
+				Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
+				Console.WriteLine($"Size: {objectSize} bytes.");
 			}
-			watch.Stop();
-			desirilizationResult = watch.ElapsedMilliseconds;
-			Console.WriteLine
-			($"JsonConvert reuslt for {entity.GetType().Name} and {iterationCount} iterations");
-			Console.WriteLine($"Serilization: {serilizationResult}ms");
-			Console.WriteLine($"Desirilization: {desirilizationResult}ms");
-			Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
+			catch(Exception ex)
+			{
+				Console.WriteLine($"Json not supported");
+			}
 			#endregion json
 
 			#region Binary
@@ -166,6 +183,7 @@ namespace PerformanceComparison
 					binaryBytes = mStream.ToArray();
 				}
 			}
+			objectSize = binaryBytes.Length;
 			watch = Stopwatch.StartNew();
 
 			for (int i = 0; i < iterationCount; i++)
@@ -182,6 +200,7 @@ namespace PerformanceComparison
 			Console.WriteLine($"Serilization: {serilizationResult}ms");
 			Console.WriteLine($"Desirilization: {desirilizationResult}ms");
 			Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
+			Console.WriteLine($"Size: {objectSize} bytes.");
 
 			#endregion Binary
 
@@ -197,6 +216,7 @@ namespace PerformanceComparison
 					zeroSerializeBytes = ZeroFormatterSerializer.Serialize(entity);
 				}
 				watch.Stop();
+				objectSize = zeroSerializeBytes.Length;
 				serilizationResult = watch.ElapsedMilliseconds;
 
 				watch = Stopwatch.StartNew();
@@ -211,6 +231,7 @@ namespace PerformanceComparison
 				Console.WriteLine($"Serilization: {serilizationResult}ms");
 				Console.WriteLine($"Desirilization: {desirilizationResult}ms");
 				Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
+				Console.WriteLine($"Size: {objectSize} bytes.");
 
 			}
 			catch(Exception ex)
@@ -232,7 +253,7 @@ namespace PerformanceComparison
 				}
 				watch.Stop();
 				serilizationResult = watch.ElapsedMilliseconds;
-
+				objectSize = zeroSerializeBytes.Length;
 				watch = Stopwatch.StartNew();
 				for (int i = 0; i < iterationCount; i++)
 				{
@@ -245,6 +266,7 @@ namespace PerformanceComparison
 				Console.WriteLine($"Serilization: {serilizationResult}ms");
 				Console.WriteLine($"Desirilization: {desirilizationResult}ms");
 				Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
+				Console.WriteLine($"Size: {objectSize} bytes.");
 
 			}
 			catch (Exception ex)

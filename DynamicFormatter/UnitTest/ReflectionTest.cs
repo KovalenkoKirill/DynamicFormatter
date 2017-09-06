@@ -4,6 +4,9 @@ using UnitTest.Models;
 using System.Reflection;
 using System.Linq;
 using DynamicFormatter;
+using DynamicFormatter.Extentions;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace UnitTest
 {
@@ -35,6 +38,50 @@ namespace UnitTest
 				var action = ReflectionUtils.CreateInstanceFieldGetter(member);
 				Assert.AreEqual(action.DynamicInvoke(item), 30);
 			}
+		}
+
+		[TestMethod]
+		public void TestSpeedCast()
+		{
+			var watch = Stopwatch.StartNew();
+			for(int i = 0;i<1000000;i++)
+			{
+				var result = SafeCast(i);
+			}
+			watch.Stop();
+			Debug.WriteLine($"SafeCast {watch.ElapsedMilliseconds}");
+
+			watch = Stopwatch.StartNew();
+			for (int i = 0; i < 1000000; i++)
+			{
+				var result = UnsafeCast(i);
+			}
+			watch.Stop();
+			Debug.WriteLine($"UnsafeCast {watch.ElapsedMilliseconds}");
+		}
+
+		public byte[] SafeCast(object entity)
+		{
+			return BitConverter.GetBytes((int)Convert.ChangeType(entity, typeof(int)));
+		}
+
+		public struct color
+		{
+			public int z;
+
+			public int v;
+		}
+		public unsafe byte[] UnsafeCast(object entity)
+		{
+			int val = (int)entity;
+			int* ptr = &val;
+			int size = sizeof(int);;
+			byte[] buffer = new byte[size];
+			fixed (byte* dest = buffer)
+			{
+				Buffer.MemoryCopy(ptr, dest, size, size);
+			}
+			return buffer;
 		}
 	}
 }

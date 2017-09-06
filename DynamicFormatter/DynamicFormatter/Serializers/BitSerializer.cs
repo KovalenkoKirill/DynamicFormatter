@@ -68,7 +68,15 @@ namespace DynamicFormatter.Serializers
 					}
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((bool)Convert.ChangeType(entity, typeof(bool)));
+					bool val = (bool)entity;
+					bool* ptr = &val;
+					int size = sizeof(bool); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(char))
@@ -81,7 +89,15 @@ namespace DynamicFormatter.Serializers
 					}
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((char)Convert.ChangeType(entity, typeof(char)));
+					char val = (char)entity;
+					char* ptr = &val;
+					int size = sizeof(char); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(sbyte))
@@ -94,7 +110,15 @@ namespace DynamicFormatter.Serializers
 					}
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((sbyte)Convert.ChangeType(entity, typeof(sbyte)));
+					sbyte val = (sbyte)entity;
+					sbyte* ptr = &val;
+					int size = sizeof(sbyte); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(short))
@@ -107,7 +131,15 @@ namespace DynamicFormatter.Serializers
 					}
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((short)Convert.ChangeType(entity, typeof(short)));
+					short val = (short)entity;
+					short* ptr = &val;
+					int size = sizeof(short); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(int))
@@ -120,7 +152,15 @@ namespace DynamicFormatter.Serializers
 					}
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((int)Convert.ChangeType(entity, typeof(int)));
+					int val = (int)entity;
+					int* ptr = &val;
+					int size = sizeof(int); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(long))
@@ -133,7 +173,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((long)Convert.ChangeType(entity, typeof(long)));
+					long val = (long)entity;
+					long* ptr = &val;
+					int size = sizeof(long); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(byte))
@@ -146,7 +194,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((byte)Convert.ChangeType(entity, typeof(byte)));
+					byte val = (byte)entity;
+					byte* ptr = &val;
+					int size = sizeof(byte); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(ushort))
@@ -159,7 +215,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((ushort)Convert.ChangeType(entity, typeof(ushort)));
+					ushort val = (ushort)entity;
+					ushort* ptr = &val;
+					int size = sizeof(ushort); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 
 			}
@@ -173,7 +237,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((uint)Convert.ChangeType(entity, typeof(uint)));
+					uint val = (uint)entity;
+					uint* ptr = &val;
+					int size = sizeof(uint); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(ulong))
@@ -186,7 +258,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((ulong)Convert.ChangeType(entity, typeof(ulong)));
+					ulong val = (ulong)entity;
+					ulong* ptr = &val;
+					int size = sizeof(ulong); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(float))
@@ -199,7 +279,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((float)Convert.ChangeType(entity, typeof(float)));
+					float val = (float)entity;
+					float* ptr = &val;
+					int size = sizeof(float); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(double))
@@ -212,7 +300,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((double)Convert.ChangeType(entity, typeof(double)));
+					double val = (double)entity;
+					double* ptr = &val;
+					int size = sizeof(double); ;
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else if (type == typeof(decimal))
@@ -225,7 +321,15 @@ namespace DynamicFormatter.Serializers
 					};
 				};
 				Serialize = (entity) => {
-					return BitConverter.GetBytes((int)Convert.ChangeType(entity, typeof(decimal)));
+					decimal val = (decimal)entity;
+					decimal* ptr = &val;
+					int size = sizeof(decimal);
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
 				};
 			}
 			else
