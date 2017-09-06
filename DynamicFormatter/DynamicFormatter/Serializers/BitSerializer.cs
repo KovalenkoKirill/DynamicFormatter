@@ -7,15 +7,15 @@ namespace DynamicFormatter.Serializers
 {
 	internal class BitSerializer
 	{
-		static Dictionary<Type, BitSerializer> innerLIst = new Dictionary<Type, BitSerializer>();
+		static Dictionary<int, BitSerializer> innerLIst = new Dictionary<int, BitSerializer>();
 
 		public static BitSerializer GetInstanse(Type t)
 		{
 			BitSerializer instanse;
-			if (!innerLIst.TryGetValue(t,out instanse))
+			if (!innerLIst.TryGetValue(t.GetHashCode(), out instanse))
 			{
 				instanse = new BitSerializer(t);
-				innerLIst.Add(t, instanse);
+				innerLIst.Add(t.GetHashCode(), instanse);
 			}
 			return instanse;
 		}

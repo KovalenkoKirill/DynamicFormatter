@@ -16,15 +16,15 @@ namespace DynamicFormatter.Serializers
 	{
 		#region static instancesBlock
 
-		private static Dictionary<Type, DynamicFormatter> _instances = new Dictionary<Type, DynamicFormatter>();
+		private static Dictionary<int, DynamicFormatter> _instances = new Dictionary<int, DynamicFormatter>();
 
 		public static DynamicFormatter Instance(Type type)
 		{
 			DynamicFormatter instanse;
-			if (!_instances.TryGetValue(type, out instanse))
+			if (!_instances.TryGetValue(type.GetHashCode(), out instanse))
 			{
 				instanse = new DynamicFormatter(type);
-				_instances.Add(type, instanse);
+				_instances.Add(type.GetHashCode(), instanse);
 			}
 			return instanse;
 		}
@@ -65,7 +65,7 @@ namespace DynamicFormatter.Serializers
 			}
 		}
 
-		private Dictionary<FieldInfo, GetterAndSetter> _accessMethods;
+		private Dictionary<int, GetterAndSetter> _accessMethods;
 
 		private Type _type;
 
@@ -144,10 +144,10 @@ namespace DynamicFormatter.Serializers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void initAccessField()
 		{
-			_accessMethods = new Dictionary<FieldInfo, GetterAndSetter>();
+			_accessMethods = new Dictionary<int, GetterAndSetter>();
 			foreach (var field in _fields)
 			{
-				_accessMethods.Add(field,
+				_accessMethods.Add(field.GetHashCode(),
 				new GetterAndSetter()
 				{
 					Getter = CreateInstanceFieldGetter(field),
@@ -227,12 +227,12 @@ namespace DynamicFormatter.Serializers
 
 		private object GetValue(object entity, FieldInfo member)
 		{
-			return _accessMethods[member].Getter.Invoke(entity);
+			return _accessMethods[member.GetHashCode()].Getter.Invoke(entity);
 		}
 
 		private void SetValue(object entity, object value, FieldInfo member)
 		{
-			_accessMethods[member].Setter.Invoke(entity, value);
+			_accessMethods[member.GetHashCode()].Setter.Invoke(entity, value);
 		}
 
 		#endregion Reflection Helpers
