@@ -124,8 +124,7 @@ namespace PerformanceComparison
 			Console.WriteLine($"Size: {objectSize} bytes.");
 
 			#endregion dynamicFormatter
-
-
+			Console.WriteLine();
 			#region json
 
 			try
@@ -160,7 +159,7 @@ namespace PerformanceComparison
 				Console.WriteLine($"Json not supported");
 			}
 			#endregion json
-
+			Console.WriteLine();
 			#region Binary
 
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -203,7 +202,7 @@ namespace PerformanceComparison
 			Console.WriteLine($"Size: {objectSize} bytes.");
 
 			#endregion Binary
-
+			Console.WriteLine();
 			#region ZeroFormatterSerializer
 
 			try
@@ -239,7 +238,7 @@ namespace PerformanceComparison
 				Console.WriteLine($"ZeroFormatter not supported this type");
 			}
 			#endregion ZeroFormatterSerializer
-
+			Console.WriteLine();
 			#region ProtoBuf
 
 			try

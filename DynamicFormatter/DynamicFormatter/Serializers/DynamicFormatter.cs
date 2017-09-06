@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 using static DynamicFormatter.Models.DynamicBuffer;
 using static DynamicFormatter.ReflectionUtils;
 using static System.Buffer;
-
+using TypeInfo = DynamicFormatter.Extentions.TypeInfo;
 namespace DynamicFormatter.Serializers
 {
 	internal class DynamicFormatter
@@ -35,7 +35,7 @@ namespace DynamicFormatter.Serializers
 
 		private static readonly byte[] nullPtrBytres = BitConverter.GetBytes(((short)-1));
 
-		private static readonly int PtrSize = sizeof(short);
+		internal static readonly int PtrSize = sizeof(short);
 
 		#endregion constField
 
@@ -45,45 +45,10 @@ namespace DynamicFormatter.Serializers
 
 		private Func<byte[], object> _Deserialize;
 
-		private List<FieldInfo> _fields_;
-
-		private List<FieldInfo> _fields
-		{
-			get
-			{
-				if(_fields_ == null)
-				{
-					_fields_ = _type.GetMembers(
-						 BindingFlags.NonPublic |
-						 BindingFlags.Public |
-						 BindingFlags.Instance)
-						 .Where(x => x.MemberType == MemberTypes.Field)
-						 .Cast<FieldInfo>()
-						 .ToList();
-				}
-				return _fields_;
-			}
-		}
-
 		private Dictionary<int, GetterAndSetter> _accessMethods;
 
-		private Type _type;
+		private TypeInfo _typeInfo;
 
-		internal int _size = 0;
-
-		private bool? _isHasReference = null;
-
-		internal bool isHasReference
-		{
-			get
-			{
-				if (_isHasReference == null)
-				{
-					_isHasReference = FindReferenceType();
-				}
-				return _isHasReference.Value;
-			}
-		}
 
 		#endregion classFields
 
@@ -105,21 +70,19 @@ namespace DynamicFormatter.Serializers
 
 		private DynamicFormatter(Type type)
 		{
-			_type = type;
-
-			_size = GetSize();
-
-			if (_type.IsValueType &&
-			(_type.IsPrimitive || !isHasReference))
+			_typeInfo = TypeInfo.instanse(type);
+;
+			if (_typeInfo.IsValueType &&
+			(_typeInfo.IsPrimitive || !_typeInfo.IsHasReference))
 			{
 				_Serialize = (entity) =>
 				{
-					BitSerializer bitSerializer = BitSerializer.GetInstanse(_type);
+					BitSerializer bitSerializer = BitSerializer.GetInstanse(_typeInfo.Type);
 					return bitSerializer.Serialize(entity);
 				};
 				_Deserialize = (buffer) =>
 				{
-					BitSerializer bitSerializer = BitSerializer.GetInstanse(_type);
+					BitSerializer bitSerializer = BitSerializer.GetInstanse(_typeInfo.Type);
 #if USE_UNSAFE
 					return bitSerializer.Deserialize(buffer,0);
 #else
@@ -145,7 +108,7 @@ namespace DynamicFormatter.Serializers
 		private void initAccessField()
 		{
 			_accessMethods = new Dictionary<int, GetterAndSetter>();
-			foreach (var field in _fields)
+			foreach (var field in _typeInfo.Fields)
 			{
 				_accessMethods.Add(field.GetHashCode(),
 				new GetterAndSetter()
@@ -155,75 +118,9 @@ namespace DynamicFormatter.Serializers
 				});
 			}
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetSize()
-		{
-			int size = 0;
-			if (_type.IsPrimitive)
-			{
-				return _type.SizeOfPrimitive();
-			}
-			else if (_type.IsArray)
-			{
-				return PtrSize;
-			}
-			foreach (var innerMember in _fields)
-			{
-				var innerMemberType = innerMember.FieldType;
-				if (innerMemberType.IsPrimitive)
-				{
-					size += innerMemberType.SizeOfPrimitive();
-				}
-				else if (innerMemberType.IsValueType)
-				{
-					if (DynamicFormatter.Instance(innerMemberType).isHasReference)
-					{
-						size += PtrSize;
-					}
-					else
-					{
-						size += Marshal.SizeOf(innerMemberType);
-					}
-				}
-				else
-				{
-					size += PtrSize;
-				}
-			}
-			return size;
-		}
-
 		#endregion constructor
 
 		#region Reflection Helpers
-
-		private bool FindReferenceType()
-		{
-			var members = _fields;
-			foreach (var member in members)
-			{
-				Type memberType = member.FieldType;
-
-				if (memberType != null)
-				{
-					if (memberType.IsValueType && memberType.IsPrimitive)
-						continue;
-					if (!memberType.IsValueType)
-					{
-						return true;
-					}
-					else
-					{
-						if (Instance(memberType).isHasReference)
-						{
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
 
 		private object GetValue(object entity, FieldInfo member)
 		{
@@ -243,11 +140,12 @@ namespace DynamicFormatter.Serializers
 		{
 			int size = sizeof(int);
 			Array array = (Array)entity;
-			Type memberType = _type.GetElementType();
+			Type memberType = _typeInfo.Type.GetElementType();
 			var serializer = Instance(memberType);
+			var memberTypeInfo = TypeInfo.instanse(memberType);
 			if (memberType.IsValueType)
 			{
-				size += serializer._size * array.Length;
+				size += memberTypeInfo.Size * array.Length;
 			}
 			else
 			{
@@ -275,8 +173,8 @@ namespace DynamicFormatter.Serializers
 					currentPadding += memberBytes.Length;
 					continue;
 				}
-				if (memberType.IsValueType &&
-				(memberType.IsPrimitive || !Instance(memberType).isHasReference))
+				if (memberTypeInfo.IsValueType &&
+				(memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
 					var memberBytes = BitSerializer.Serialize(value);
@@ -300,25 +198,25 @@ namespace DynamicFormatter.Serializers
 		//Serializetion For Reference type
 		private BufferPtr ReferenceSerizlize(object Entity, DynamicBuffer buffer, Dictionary<object, BufferPtr> referenceMaping)
 		{
-			if (!_type.IsValueType)
+			if (!_typeInfo.IsValueType)
 			{
 				if (referenceMaping.ContainsKey(Entity))
 				{
 					return referenceMaping[Entity];
 				}
 			}
-			if (_type.IsArray)
+			if (_typeInfo.IsArray)
 			{
 				return ArraySerialize(Entity, buffer, referenceMaping);
 			}
-			int size = _size;
+			int size = _typeInfo.Size;
 			byte[] current = new byte[size];
 			var ptr = buffer.Alloc(size);
 			referenceMaping.Add(Entity, ptr);
 			int currentPadding = 0;
-			foreach (var member in _fields)
+			foreach (var member in _typeInfo.Fields)
 			{
-				Type memberType = member.FieldType;
+				var memberTypeInfo = TypeInfo.instanse(member.FieldType);
 				object value = GetValue(Entity, member);
 				if (value == null) //null ptr
 				{
@@ -333,10 +231,10 @@ namespace DynamicFormatter.Serializers
 					currentPadding += memberBytes.Length;
 					continue;
 				}
-				if (memberType.IsValueType &&
-				(memberType.IsPrimitive || !Instance(memberType).isHasReference))
+				if (memberTypeInfo.IsValueType &&
+				(memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
 				{
-					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
+					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberTypeInfo.Type);
 					var memberBytes = BitSerializer.Serialize(value);
 					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
@@ -344,7 +242,7 @@ namespace DynamicFormatter.Serializers
 				}
 				else
 				{
-					var objectptr = Instance(memberType).ReferenceSerizlize(value, buffer, referenceMaping);
+					var objectptr = Instance(memberTypeInfo.Type).ReferenceSerizlize(value, buffer, referenceMaping);
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
 					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
@@ -373,11 +271,11 @@ namespace DynamicFormatter.Serializers
 			var sizePtr = buffer.GetPtr(ptr.position, sizeof(int));
 			int arrayLenght = BitConverter.ToInt32(sizePtr.Read(), 0);
 			int bufferSize = sizeof(int);
-			var elementType = _type.GetElementType();
-			Array entity = Array.CreateInstance(elementType, arrayLenght);
-			var entitySerializer = Instance(elementType);
+			var elementTypeInfo = TypeInfo.instanse(_typeInfo.Type.GetElementType());
+			Array entity = Array.CreateInstance(elementTypeInfo.Type, arrayLenght);
+			var entitySerializer = Instance(elementTypeInfo.Type);
 
-			int elementSize = elementType.IsValueType ? entitySerializer._size : PtrSize;
+			int elementSize = elementTypeInfo.IsValueType ? elementTypeInfo.Size : PtrSize;
 
 			bufferSize += elementSize * entity.Length;
 
@@ -389,8 +287,8 @@ namespace DynamicFormatter.Serializers
 			{
 				int positionInByffer = sizeof(int) + (index * elementSize);
 
-				if (elementType.IsValueType &&
-				   (elementType.IsPrimitive || !Instance(elementType).isHasReference))
+				if (elementTypeInfo.IsValueType &&
+				   (elementTypeInfo.IsPrimitive || !elementTypeInfo.IsHasReference))
 				{
 					byte[] memberBuffer = new byte[elementSize];
 					BlockCopy(arrayBytes, positionInByffer, memberBuffer, 0, elementSize);
@@ -411,7 +309,7 @@ namespace DynamicFormatter.Serializers
 					}
 					else
 					{
-						var elementPtr = buffer.GetPtr(elementPosition, entitySerializer._size);
+						var elementPtr = buffer.GetPtr(elementPosition, elementTypeInfo.Size);
 						element = entitySerializer.ReferenceDesirialize(elementPtr, buffer, referenceMaping);
 						entity.SetValue(element, index);
 					}
@@ -425,23 +323,23 @@ namespace DynamicFormatter.Serializers
 
 		private object ReferenceDesirialize(BufferPtr ptr, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
-			if (_type.IsArray)
+			if (_typeInfo.IsArray)
 			{
 				return ArrayDesirialize(ptr, buffer, referenceMaping);
 			}
-			object entity = FormatterServices.GetSafeUninitializedObject(_type);
+			object entity = FormatterServices.GetSafeUninitializedObject(_typeInfo.Type);
 			referenceMaping.Add(ptr.position, entity);
 
 			byte[] objectBytes = ptr.Read();
 			int bytesRead = 0;
-			foreach (var member in _fields)
+			foreach (var member in _typeInfo.Fields)
 			{
-				Type memberType = member.FieldType;
-				if (memberType.IsValueType &&
-				   (memberType.IsPrimitive || !Instance(memberType).isHasReference))
+				var memberTypeInfo = TypeInfo.instanse(member.FieldType);
+				if (memberTypeInfo.IsValueType &&
+				   (memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
 				{
-					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberType);
-					int size = memberType.SizeOfPrimitive();
+					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberTypeInfo.Type);
+					int size = memberTypeInfo.Type.SizeOfPrimitive();
 #if USE_UNSAFE
 					object value = BitSerializer.Deserialize(objectBytes, bytesRead);
 
@@ -461,8 +359,8 @@ namespace DynamicFormatter.Serializers
 						continue;
 					}
 					bytesRead += PtrSize;
-					var Serializer = Instance(memberType);
-					var refPtr = buffer.GetPtr(refPosition, Serializer._size);
+					var Serializer = Instance(memberTypeInfo.Type);
+					var refPtr = buffer.GetPtr(refPosition, memberTypeInfo.Size);
 					object obj;
 					if (referenceMaping.ContainsKey(refPtr.position))
 					{
@@ -484,7 +382,7 @@ namespace DynamicFormatter.Serializers
 
 			var buffer = new DynamicBuffer(entityBytes);
 
-			var rootObject = buffer.GetPtr(0, _size);
+			var rootObject = buffer.GetPtr(0, _typeInfo.Size);
 
 			return ReferenceDesirialize(rootObject, buffer, referenceMaping);
 		}
