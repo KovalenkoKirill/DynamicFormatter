@@ -58,6 +58,14 @@ namespace UnitTest
 			Debug.WriteLine($"UnsafeCast {watch.ElapsedMilliseconds}");
 		}
 
+
+
+		[TestMethod]
+		public void NullableReflection()
+		{
+			int? d = null;
+		}
+
 		public byte[] SafeCast(object entity)
 		{
 			return BitConverter.GetBytes((int)Convert.ChangeType(entity, typeof(int)));

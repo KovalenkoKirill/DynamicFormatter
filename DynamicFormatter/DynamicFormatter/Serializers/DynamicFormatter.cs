@@ -36,7 +36,7 @@ namespace DynamicFormatter.Serializers
 			_typeInfo = TypeInfo.instanse(type);
 			;
 			if (_typeInfo.IsValueType &&
-			(_typeInfo.IsPrimitive || !_typeInfo.IsHasReference))
+			(_typeInfo.IsPrimitive || !_typeInfo.IsHasReference) && !_typeInfo.IsGeneric)
 			{
 				_Serialize = (entity) =>
 				{
@@ -243,6 +243,10 @@ namespace DynamicFormatter.Serializers
 			{
 				return ArrayDesirialize(ptr, buffer, referenceMaping);
 			}
+			if(_typeInfo.isNullable)
+			{
+				return NullableDesirialize(ptr, buffer, referenceMaping);
+			}
 			object entity = FormatterServices.GetSafeUninitializedObject(_typeInfo.Type);
 			referenceMaping.Add(ptr.position, entity);
 
@@ -320,19 +324,19 @@ namespace DynamicFormatter.Serializers
 					BlockCopy(nullPtrBytres, 0, current, currentPadding, nullPtrBytres.Length);
 					currentPadding += nullPtrBytres.Length;
 				}
-				else if (referenceMaping.ContainsKey(value))
-				{
-					var objectptr = referenceMaping[value];
-					var memberBytes = BitConverter.GetBytes(objectptr.position);
-					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
-					currentPadding += memberBytes.Length;
-					continue;
-				}
 				if (memberTypeInfo.IsValueType &&
 				(memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberTypeInfo.Type);
 					var memberBytes = BitSerializer.Serialize(value);
+					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
+					currentPadding += memberBytes.Length;
+					continue;
+				}
+				else if (!memberTypeInfo.IsValueType && referenceMaping.ContainsKey(value))
+				{
+					var objectptr = referenceMaping[value];
+					var memberBytes = BitConverter.GetBytes(objectptr.position);
 					BlockCopy(memberBytes, 0, current, currentPadding, memberBytes.Length);
 					currentPadding += memberBytes.Length;
 					continue;
@@ -348,6 +352,14 @@ namespace DynamicFormatter.Serializers
 			}
 			ptr.Set(current);
 			return ptr;
+		}
+
+		private object NullableDesirialize(BufferPtr ptr, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
+		{
+			object entity = FormatterServices.GetSafeUninitializedObject(_typeInfo.Type);
+			byte[] objectBytes = ptr.Read();
+			int bytesRead = 0;
+			BitSerializer BitSerializer = BitSerializer.GetInstanse(typeof(bool));
 		}
 
 		private object ReferenceTypeDesirialize(byte[] entityBytes)

@@ -379,7 +379,7 @@ namespace DynamicFormatter.Serializers
 				{
 					object str = Activator.CreateInstance(type);
 
-					int size = Marshal.SizeOf(str);
+					int size = Marshal.SizeOf(type);
 					IntPtr ptr = Marshal.AllocHGlobal(size);
 
 					Marshal.Copy(buffer, offset, ptr, size);
@@ -391,7 +391,7 @@ namespace DynamicFormatter.Serializers
 				};
 				Serialize = (entity) =>
 				{
-					int size = Marshal.SizeOf(entity);
+					int size = Marshal.SizeOf(type);
 					byte[] arr = new byte[size];
 
 					IntPtr ptr = Marshal.AllocHGlobal(size);

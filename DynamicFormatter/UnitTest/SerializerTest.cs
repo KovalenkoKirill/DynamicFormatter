@@ -25,6 +25,16 @@ namespace UnitTest
 		}
 
 		[TestMethod]
+		public void DynamicFormatterNullableTest()
+		{
+			Nullable<bool> testEntity = true;
+			var DynamicFormatter = new DynamicFormatter<bool?>();
+			var buffer = DynamicFormatter.Serialize(testEntity);
+			var resultEntity = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(testEntity, resultEntity);
+		}
+
+		[TestMethod]
 		public void DynamicFormatterDateTimeInClass()
 		{
 			var firstDate = DateTime.Now;

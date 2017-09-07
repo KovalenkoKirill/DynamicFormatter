@@ -53,6 +53,10 @@ namespace DynamicFormatter
 
 		private NullableBool _isHasReference = NullableBool.Unknown;
 
+		private NullableBool _isGeneric = NullableBool.Unknown;
+
+		private bool? _isNullable = null;
+
 		private List<FieldInfo> _fields;
 
 		private int _size = -1;
@@ -95,6 +99,25 @@ namespace DynamicFormatter
 						 .ToList();
 				}
 				return _fields;
+			}
+		}
+
+		public bool isNullable
+		{
+			get
+			{
+				if(_isNullable == null)
+				{
+					if(IsValueType && IsGeneric && Type == typeof(Nullable<>))
+					{
+						_isNullable = true;
+					}
+					else
+					{
+						_isNullable = false;
+					}
+				}
+				return (bool)_isNullable;
 			}
 		}
 
@@ -158,6 +181,18 @@ namespace DynamicFormatter
 			}
 		}
 
+		public bool IsGeneric
+		{
+			get
+			{
+				if (_isGeneric == NullableBool.Unknown)
+				{
+					_isGeneric = _type.IsGenericType ? NullableBool.True : NullableBool.False;
+				}
+				return _isGeneric == NullableBool.True;
+			}
+		}
+
 		public Type ElementTypeInfo
 		{
 			get
@@ -186,7 +221,7 @@ namespace DynamicFormatter
 					var typeInfo = instanse(memberType);
 					if (typeInfo.IsValueType && typeInfo.IsPrimitive)
 						continue;
-					if (!memberType.IsValueType)
+					if (!memberType.IsValueType || memberType.IsGenericType)
 					{
 						return true;
 					}
