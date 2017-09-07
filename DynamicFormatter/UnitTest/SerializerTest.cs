@@ -13,23 +13,34 @@ namespace UnitTest
 	{
 		private const int iterationCount = 1000000;
 
-		[TestMethod]
-		public void DynamicFormatterTest()
-		{
-			var DynamicFormatter = new DynamicFormatter<ClassForTest>();
-			var testEntity = new ClassForTest();
-			var buffer = DynamicFormatter.Serialize(testEntity);
-			var testEintity = DynamicFormatter.Deserialize(buffer);
-		}
 
 		[TestMethod]
 		public void DynamicFormatterDateTimeTest()
 		{
-			DateTime time = DateTime.Now;
+			var time = DateTime.Now;
 			var DynamicFormatter = new DynamicFormatter<DateTime>();
 			var buffer = DynamicFormatter.Serialize(time);
 			var resultTime = DynamicFormatter.Deserialize(buffer);
 			Assert.AreEqual(time, resultTime);
+		}
+
+		[TestMethod]
+		public void DynamicFormatterDateTimeInClass()
+		{
+			var firstDate = DateTime.Now;
+			var secondDate = DateTime.Now.AddHours(1);
+			var DynamicFormatter = new DynamicFormatter<ClassWithDateTime>();
+
+			var testEntity = new ClassWithDateTime()
+			{
+				FirstDate = firstDate,
+				OtherDate = secondDate
+			};
+
+			var buffer = DynamicFormatter.Serialize(testEntity);
+			var resultTime = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(testEntity.FirstDate, resultTime.FirstDate);
+			Assert.AreEqual(testEntity.OtherDate, resultTime.OtherDate);
 		}
 
 		[TestMethod]
@@ -77,6 +88,27 @@ namespace UnitTest
 		}
 
 		[TestMethod]
+		public void DynamicFormatterStringTest()
+		{
+			var DynamicFormatter = new DynamicFormatter<string>();
+			var someString = "This is some string";
+			var stringBytes = DynamicFormatter.Serialize(someString);
+			var someStringCopy = DynamicFormatter.Deserialize(stringBytes);
+			Assert.AreEqual(someString, someStringCopy);
+		}
+
+		[TestMethod]
+		public void DynamicFormatterStringInClass()
+		{
+			var DynamicFormatter = new DynamicFormatter<ClassWithStrings>();
+			var testClass = new ClassWithStrings();
+			var classBytes = DynamicFormatter.Serialize(testClass);
+			var testClassCopy = DynamicFormatter.Deserialize(classBytes);
+			Assert.AreEqual(testClass.someString, testClassCopy.someString);
+			Assert.AreEqual(testClass.secondSomeString, testClassCopy.secondSomeString);
+		}
+
+		[TestMethod]
 		public void DynamicFormatterStuctTest()
 		{
 			var DynamicFormatter = new DynamicFormatter<TestStruct>();
@@ -87,28 +119,9 @@ namespace UnitTest
 				R = 1
 			};
 
-			var watch = Stopwatch.StartNew();
-			for (int i = 0; i < iterationCount; i++)
-			{
-				var buffer = DynamicFormatter.Serialize(testEntity);
-				var testEintity = DynamicFormatter.Deserialize(buffer);
-			}
-			watch.Stop();
-			Debug.WriteLine($"DynamicSerialize result {watch.ElapsedMilliseconds} ms.");
-
-			BinaryFormatter binary = new BinaryFormatter();
-			watch = Stopwatch.StartNew();
-			for (int i = 0; i < iterationCount; i++)
-			{
-				using (MemoryStream mStream = new MemoryStream())
-				{
-					binary.Serialize(mStream, testEntity);
-					mStream.Position = 0;
-					var testEintity = binary.Deserialize(mStream);
-				}
-			}
-			watch.Stop();
-			Debug.WriteLine($"BinarySerializer result {watch.ElapsedMilliseconds} ms.");
+			var testEntityBytes = DynamicFormatter.Serialize(testEntity);
+			var testEintityResult = DynamicFormatter.Deserialize(testEntityBytes);
+			Assert.AreEqual(testEntity, testEintityResult);
 		}
 	}
 }

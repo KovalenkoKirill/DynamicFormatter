@@ -6,7 +6,7 @@ namespace DynamicFormatter
 {
 	internal static class BaseTypeSizeHelper
 	{
-		static Dictionary<int, int> basedTypeSize = new Dictionary<int, int>();
+		private static Dictionary<int, int> basedTypeSize = new Dictionary<int, int>();
 
 		static BaseTypeSizeHelper()
 		{
@@ -22,12 +22,13 @@ namespace DynamicFormatter
 			basedTypeSize.Add(typeof(float).GetHashCode(), sizeof(float));
 			basedTypeSize.Add(typeof(double).GetHashCode(), sizeof(double));
 			basedTypeSize.Add(typeof(decimal).GetHashCode(), sizeof(decimal));
+			basedTypeSize.Add(typeof(DateTime).GetHashCode(), sizeof(long));
 		}
 
 		public static int SizeOfPrimitive(this Type type)
 		{
 			int containsSize;
-			if(basedTypeSize.TryGetValue(type.GetHashCode(), out containsSize))
+			if (basedTypeSize.TryGetValue(type.GetHashCode(), out containsSize))
 			{
 				return containsSize;
 			}

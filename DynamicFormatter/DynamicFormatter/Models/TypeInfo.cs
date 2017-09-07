@@ -5,54 +5,70 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using static DynamicFormatter.Serializers.DynamicFormatter;
 
-namespace DynamicFormatter.Extentions
+namespace DynamicFormatter
 {
 	internal class TypeInfo
 	{
-	#region instanse
-		static Dictionary<int, TypeInfo> typeInfoDictionary = new Dictionary<int, TypeInfo>();
+		#region instanse
+
+		private static Dictionary<int, TypeInfo> typeInfoDictionary = new Dictionary<int, TypeInfo>();
 
 		public static TypeInfo instanse(Type type)
 		{
 			TypeInfo typeInfo = null;
 			int hashCode = type.GetHashCode();
-			if (!typeInfoDictionary.TryGetValue(type.GetHashCode(),out typeInfo))
+			if (!typeInfoDictionary.TryGetValue(type.GetHashCode(), out typeInfo))
 			{
 				typeInfo = new TypeInfo(type);
 				typeInfoDictionary.Add(hashCode, typeInfo);
 			}
 			return typeInfo;
 		}
-		#endregion
+
+		#endregion instanse
+
+		#region StaticCounstuctor
+
+		static TypeInfo()
+		{
+			var typeInfo = new TypeInfo(typeof(string));
+			typeInfo._isArrayType = NullableBool.True;
+			typeInfo._elementTypeInfo = typeof(char);
+			typeInfoDictionary.Add(typeof(string).GetHashCode(), typeInfo);
+		}
+
+		#endregion StaticCounstuctor
 
 		#region members
 
-		Type _type;
+		private Type _type;
 
-		NullableBool _isPrimitiveType = NullableBool.Unknown;
+		private NullableBool _isPrimitiveType = NullableBool.Unknown;
 
-		NullableBool _isValueType = NullableBool.Unknown;
+		private NullableBool _isValueType = NullableBool.Unknown;
 
-		NullableBool _isArrayType = NullableBool.Unknown;
+		private NullableBool _isArrayType = NullableBool.Unknown;
 
-		NullableBool _isHasReference = NullableBool.Unknown;
+		private NullableBool _isHasReference = NullableBool.Unknown;
 
 		private List<FieldInfo> _fields;
 
-		int _size = -1;
+		private int _size = -1;
 
-		#endregion
+		private Type _elementTypeInfo;
+
+		#endregion members
 
 		#region constructor
-		private TypeInfo(Type type) 
+
+		private TypeInfo(Type type)
 		{
 			this._type = type;
 		}
-		#endregion
+
+		#endregion constructor
 
 		#region Property
 
@@ -86,7 +102,7 @@ namespace DynamicFormatter.Extentions
 		{
 			get
 			{
-				if(_isValueType == NullableBool.Unknown)
+				if (_isValueType == NullableBool.Unknown)
 				{
 					_isValueType = _type.IsValueType ? NullableBool.True : NullableBool.False;
 				}
@@ -105,6 +121,7 @@ namespace DynamicFormatter.Extentions
 				return _isArrayType == NullableBool.True;
 			}
 		}
+
 		public bool IsPrimitive
 		{
 			get
@@ -133,7 +150,7 @@ namespace DynamicFormatter.Extentions
 		{
 			get
 			{
-				if(_size < 0)
+				if (_size < 0)
 				{
 					_size = GetSize();
 				}
@@ -141,7 +158,19 @@ namespace DynamicFormatter.Extentions
 			}
 		}
 
-		#endregion
+		public Type ElementTypeInfo
+		{
+			get
+			{
+				if (_elementTypeInfo == null)
+				{
+					_elementTypeInfo = Type.GetElementType();
+				}
+				return _elementTypeInfo;
+			}
+		}
+
+		#endregion Property
 
 		#region Method
 
@@ -200,7 +229,7 @@ namespace DynamicFormatter.Extentions
 					}
 					else
 					{
-						size += Marshal.SizeOf(innerMembreTypeInfo.Type);
+						size += innerMembreTypeInfo.Type.SizeOfPrimitive();
 					}
 				}
 				else
@@ -215,6 +244,7 @@ namespace DynamicFormatter.Extentions
 		{
 			return _type.GetHashCode();
 		}
-		#endregion
+
+		#endregion Method
 	}
 }

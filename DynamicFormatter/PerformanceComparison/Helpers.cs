@@ -23,7 +23,8 @@ namespace PerformanceComparison
 				throw;
 			}
 		}
-		public static T ProtoDeserialize<T>(byte[] data) 
+
+		public static T ProtoDeserialize<T>(byte[] data)
 		{
 			if (null == data) return default(T);
 

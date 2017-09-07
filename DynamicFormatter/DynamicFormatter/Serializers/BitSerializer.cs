@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace DynamicFormatter.Serializers
 {
 	internal class BitSerializer
 	{
-		static Dictionary<int, BitSerializer> innerLIst = new Dictionary<int, BitSerializer>();
+		private static Dictionary<int, BitSerializer> innerLIst = new Dictionary<int, BitSerializer>();
 
 		public static BitSerializer GetInstanse(Type t)
 		{
@@ -19,15 +18,18 @@ namespace DynamicFormatter.Serializers
 			}
 			return instanse;
 		}
+
 		///
 		/// Block from https://github.com/google/flatbuffers/blob/master/net/FlatBuffers/ByteBuffer.cs
-		/// 
+		///
 #if USE_UNSAFE
+
 		static public ushort ReverseBytes(ushort input)
 		{
 			return (ushort)(((input & 0x00FFU) << 8) |
 							((input & 0xFF00U) >> 8));
 		}
+
 		static public uint ReverseBytes(uint input)
 		{
 			return ((input & 0x000000FFU) << 24) |
@@ -35,6 +37,7 @@ namespace DynamicFormatter.Serializers
 				   ((input & 0x00FF0000U) >> 8) |
 				   ((input & 0xFF000000U) >> 24);
 		}
+
 		static public ulong ReverseBytes(ulong input)
 		{
 			return (((input & 0x00000000000000FFUL) << 56) |
@@ -46,28 +49,32 @@ namespace DynamicFormatter.Serializers
 					((input & 0x00FF000000000000UL) >> 40) |
 					((input & 0xFF00000000000000UL) >> 56));
 		}
+
 		internal Func<byte[], int, object> Deserialize;
 		internal Func<object, byte[]> Serialize;
 #else
-		
+
 		internal Func<byte[], object> Deserialize;
 		internal Func<object, byte[]> Serialize;
 
 #endif
+
 		private unsafe BitSerializer(Type type)
 		{
 			#region PrimitiveTypes
+
 #if USE_UNSAFE
 			if (type == typeof(bool))
 			{
-				Deserialize = (buffer,offset) =>
+				Deserialize = (buffer, offset) =>
 				{
-					fixed(byte* ptr = buffer)
+					fixed (byte* ptr = buffer)
 					{
 						return *(bool*)(ptr);
 					}
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					bool val = (bool)entity;
 					bool* ptr = &val;
 					int size = sizeof(bool); ;
@@ -88,7 +95,8 @@ namespace DynamicFormatter.Serializers
 						return *(char*)(ptr + offset);
 					}
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					char val = (char)entity;
 					char* ptr = &val;
 					int size = sizeof(char); ;
@@ -109,7 +117,8 @@ namespace DynamicFormatter.Serializers
 						return *(sbyte*)(ptr + offset);
 					}
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					sbyte val = (sbyte)entity;
 					sbyte* ptr = &val;
 					int size = sizeof(sbyte); ;
@@ -130,7 +139,8 @@ namespace DynamicFormatter.Serializers
 						return *(short*)(ptr + offset);
 					}
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					short val = (short)entity;
 					short* ptr = &val;
 					int size = sizeof(short); ;
@@ -151,7 +161,8 @@ namespace DynamicFormatter.Serializers
 						return *(int*)(ptr + offset);
 					}
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					int val = (int)entity;
 					int* ptr = &val;
 					int size = sizeof(int); ;
@@ -172,7 +183,8 @@ namespace DynamicFormatter.Serializers
 						return *(long*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					long val = (long)entity;
 					long* ptr = &val;
 					int size = sizeof(long); ;
@@ -193,7 +205,8 @@ namespace DynamicFormatter.Serializers
 						return *(byte*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					byte val = (byte)entity;
 					byte* ptr = &val;
 					int size = sizeof(byte); ;
@@ -214,7 +227,8 @@ namespace DynamicFormatter.Serializers
 						return *(ushort*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					ushort val = (ushort)entity;
 					ushort* ptr = &val;
 					int size = sizeof(ushort); ;
@@ -225,7 +239,6 @@ namespace DynamicFormatter.Serializers
 					}
 					return buffer;
 				};
-
 			}
 			else if (type == typeof(uint))
 			{
@@ -236,7 +249,8 @@ namespace DynamicFormatter.Serializers
 						return *(uint*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					uint val = (uint)entity;
 					uint* ptr = &val;
 					int size = sizeof(uint); ;
@@ -257,7 +271,8 @@ namespace DynamicFormatter.Serializers
 						return *(ulong*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					ulong val = (ulong)entity;
 					ulong* ptr = &val;
 					int size = sizeof(ulong); ;
@@ -278,7 +293,8 @@ namespace DynamicFormatter.Serializers
 						return *(float*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					float val = (float)entity;
 					float* ptr = &val;
 					int size = sizeof(float); ;
@@ -299,7 +315,8 @@ namespace DynamicFormatter.Serializers
 						return *(double*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					double val = (double)entity;
 					double* ptr = &val;
 					int size = sizeof(double); ;
@@ -320,7 +337,8 @@ namespace DynamicFormatter.Serializers
 						return *(double*)(ptr + offset);
 					};
 				};
-				Serialize = (entity) => {
+				Serialize = (entity) =>
+				{
 					decimal val = (decimal)entity;
 					decimal* ptr = &val;
 					int size = sizeof(decimal);
@@ -332,9 +350,33 @@ namespace DynamicFormatter.Serializers
 					return buffer;
 				};
 			}
+			else if(type == typeof(DateTime))
+			{
+				Serialize = (entity) => {
+					DateTime date = (DateTime)entity;
+					long tick = date.Ticks;
+					long* ptr = &tick;
+					int size = sizeof(long);
+					byte[] buffer = new byte[size];
+					fixed (byte* dest = buffer)
+					{
+						Buffer.MemoryCopy(ptr, dest, size, size);
+					}
+					return buffer;
+				};
+				Deserialize = (buffer, offset) =>
+				{
+					fixed (byte* ptr = buffer)
+					{
+						long tick = *(long*)(ptr + offset);
+						return new DateTime(tick);
+					};
+				};
+			}
 			else
 			{
-				Deserialize = (buffer,offset) => {
+				Deserialize = (buffer, offset) =>
+				{
 					object str = Activator.CreateInstance(type);
 
 					int size = Marshal.SizeOf(str);
@@ -439,7 +481,6 @@ namespace DynamicFormatter.Serializers
 				Serialize = (entity) => {
 					return BitConverter.GetBytes((ushort)Convert.ChangeType(entity, typeof(ushort)));
 				};
-
 			}
 			else if (type == typeof(uint))
 			{
@@ -519,8 +560,8 @@ namespace DynamicFormatter.Serializers
 				};
 			}
 #endif
-			#endregion
 
+			#endregion PrimitiveTypes
 		}
 	}
 }

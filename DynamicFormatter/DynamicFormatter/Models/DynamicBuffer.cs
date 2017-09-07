@@ -1,5 +1,4 @@
-﻿using System;
-using static System.Buffer;
+﻿using static System.Buffer;
 
 namespace DynamicFormatter.Models
 {
@@ -63,7 +62,7 @@ namespace DynamicFormatter.Models
 			get
 			{
 				byte[] result = new byte[size];
-				BlockCopy(bytes, 0 ,result, 0, size);
+				BlockCopy(bytes, 0, result, 0, size);
 				return result;
 			}
 		}
@@ -73,7 +72,7 @@ namespace DynamicFormatter.Models
 			if (bytes.Length < lenghtNeeded)
 			{
 				byte[] nextBuffer = new byte[lenghtNeeded * 2];
-				BlockCopy(bytes,0, nextBuffer,0, bytes.Length);
+				BlockCopy(bytes, 0, nextBuffer, 0, bytes.Length);
 				bytes = nextBuffer;
 				size = lenghtNeeded;
 			}

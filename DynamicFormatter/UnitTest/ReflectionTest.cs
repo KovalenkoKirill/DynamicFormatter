@@ -1,11 +1,10 @@
-﻿using System;
+﻿using DynamicFormatter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UnitTest.Models;
-using System.Reflection;
-using System.Linq;
-using DynamicFormatter;
-using System.Runtime.InteropServices;
+using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using UnitTest.Models;
 
 namespace UnitTest
 {
@@ -24,8 +23,8 @@ namespace UnitTest
 						 BindingFlags.Instance)
 						 .Where(x => x.MemberType == MemberTypes.Field)
 						 .Cast<FieldInfo>().ToList();
-			
-			foreach(var member in _memberInfo)
+
+			foreach (var member in _memberInfo)
 			{
 				var action = ReflectionUtils.CreateInstanceFieldSetter(member);
 				action.Invoke(item, (object)30);
@@ -43,7 +42,7 @@ namespace UnitTest
 		public void TestSpeedCast()
 		{
 			var watch = Stopwatch.StartNew();
-			for(int i = 0;i<1000000;i++)
+			for (int i = 0; i < 1000000; i++)
 			{
 				var result = SafeCast(i);
 			}
@@ -68,7 +67,7 @@ namespace UnitTest
 		{
 			int val = (int)entity;
 			int* ptr = &val;
-			int size = sizeof(int);;
+			int size = sizeof(int); ;
 			byte[] buffer = new byte[size];
 			fixed (byte* dest = buffer)
 			{

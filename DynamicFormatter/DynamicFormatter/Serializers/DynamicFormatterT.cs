@@ -1,5 +1,4 @@
-﻿
-namespace DynamicFormatter
+﻿namespace DynamicFormatter
 {
 	public class DynamicFormatter<T> : ISerializer<T>
 	{

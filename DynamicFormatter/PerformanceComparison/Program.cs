@@ -51,6 +51,7 @@ namespace PerformanceComparison
 								G = 55
 							}, iterationCount);
 							break;
+
 						case "2":
 							SerializeTest<BaseClass>(new BaseClass()
 							{
@@ -59,9 +60,11 @@ namespace PerformanceComparison
 								G = 55
 							}, iterationCount);
 							break;
+
 						case "3":
 							SerializeTest<int>(10, iterationCount);
 							break;
+
 						case "4":
 							SerializeTest<ClassWithInnerReference>(new ClassWithInnerReference()
 							{
@@ -76,8 +79,9 @@ namespace PerformanceComparison
 								}
 							}, iterationCount);
 							break;
+
 						case "5":
-							SerializeTest<CrossReferenceClass>(new CrossReferenceClass(),iterationCount);
+							SerializeTest<CrossReferenceClass>(new CrossReferenceClass(), iterationCount);
 							break;
 					}
 				}
@@ -124,12 +128,13 @@ namespace PerformanceComparison
 			Console.WriteLine($"Size: {objectSize} bytes.");
 
 			#endregion dynamicFormatter
+
 			Console.WriteLine();
+
 			#region json
 
 			try
 			{
-
 				watch = Stopwatch.StartNew();
 
 				string json = string.Empty;
@@ -154,12 +159,15 @@ namespace PerformanceComparison
 				Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
 				Console.WriteLine($"Size: {objectSize} bytes.");
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Console.WriteLine($"Json not supported");
 			}
+
 			#endregion json
+
 			Console.WriteLine();
+
 			#region Binary
 
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -202,12 +210,13 @@ namespace PerformanceComparison
 			Console.WriteLine($"Size: {objectSize} bytes.");
 
 			#endregion Binary
+
 			Console.WriteLine();
+
 			#region ZeroFormatterSerializer
 
 			try
 			{
-
 				byte[] zeroSerializeBytes = null;
 				watch = Stopwatch.StartNew();
 				for (int i = 0; i < iterationCount; i++)
@@ -231,19 +240,20 @@ namespace PerformanceComparison
 				Console.WriteLine($"Desirilization: {desirilizationResult}ms");
 				Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
 				Console.WriteLine($"Size: {objectSize} bytes.");
-
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Console.WriteLine($"ZeroFormatter not supported this type");
 			}
+
 			#endregion ZeroFormatterSerializer
+
 			Console.WriteLine();
+
 			#region ProtoBuf
 
 			try
 			{
-
 				byte[] zeroSerializeBytes = null;
 				watch = Stopwatch.StartNew();
 				for (int i = 0; i < iterationCount; i++)
@@ -266,14 +276,13 @@ namespace PerformanceComparison
 				Console.WriteLine($"Desirilization: {desirilizationResult}ms");
 				Console.WriteLine($"Total: {serilizationResult + desirilizationResult}ms");
 				Console.WriteLine($"Size: {objectSize} bytes.");
-
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine($"ProtoBuf not supported this type");
 			}
-			#endregion
-		}
 
+			#endregion ProtoBuf
+		}
 	}
 }

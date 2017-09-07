@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnitTest.Models
 {
 	[Serializable]
-	struct TestStructWithReference
+	internal struct TestStructWithReference
 	{
 		public int R { get; set; }
 
@@ -19,7 +16,7 @@ namespace UnitTest.Models
 	}
 
 	[Serializable]
-	struct TestStruct
+	internal struct TestStruct
 	{
 		public int R { get; set; }
 
@@ -45,7 +42,7 @@ namespace UnitTest.Models
 	[Serializable]
 	public class ClassForTest
 	{
-		int i = 0;
+		private int i = 0;
 		public int z = 50;
 		public int azaza { get; set; }
 
@@ -81,5 +78,20 @@ namespace UnitTest.Models
 					new ArrayItem()
 				};
 		}
+	}
+
+	[Serializable]
+	public class ClassWithStrings
+	{
+		public string someString = "First string";
+
+		public string secondSomeString = "Second string";
+	}
+	[Serializable]
+	public class ClassWithDateTime
+	{
+		public DateTime FirstDate { get; set; }
+
+		public DateTime OtherDate { get; set; }
 	}
 }

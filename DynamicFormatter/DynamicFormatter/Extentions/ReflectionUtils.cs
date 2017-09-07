@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DynamicFormatter
 {
 #if DEBUG
+
 	public static class ReflectionUtils
 #else
 	internal static class ReflectionUtils
 #endif
 	{
-		public static Func<object,object> CreateInstanceFieldGetter(FieldInfo fieldInfo)
+		public static Func<object, object> CreateInstanceFieldGetter(FieldInfo fieldInfo)
 		{
 			ParameterExpression p1 = Expression.Parameter(typeof(object), "p1");
-			var body =Expression.Convert(
+			var body = Expression.Convert(
 			Expression.Field(Expression.Convert(p1, fieldInfo.DeclaringType), fieldInfo),
 			typeof(object));
 			var lambda = Expression.Lambda<Func<object, object>>(body, p1);

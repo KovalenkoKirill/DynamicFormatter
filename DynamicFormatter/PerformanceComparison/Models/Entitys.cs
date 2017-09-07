@@ -1,9 +1,5 @@
 ﻿using ProtoBuf;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ZeroFormatter;
 
 namespace PerformanceComparison.Models
@@ -25,7 +21,7 @@ namespace PerformanceComparison.Models
 		[ProtoMember(3)]
 		public int B { get; set; }
 
-		public BaseStruct(int R,int G,int B)
+		public BaseStruct(int R, int G, int B)
 		{
 			this.R = R;
 			this.G = G;
