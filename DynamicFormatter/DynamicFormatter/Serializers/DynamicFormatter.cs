@@ -313,7 +313,10 @@ namespace DynamicFormatter.Serializers
 			int size = _typeInfo.Size;
 			byte[] current = new byte[size];
 			var ptr = buffer.Alloc(size);
-			referenceMaping.Add(Entity, ptr);
+			if (Entity != null)
+			{
+				referenceMaping.Add(Entity, ptr);
+			}
 			int currentPadding = 0;
 			foreach (var member in _typeInfo.Fields)
 			{
@@ -354,12 +357,29 @@ namespace DynamicFormatter.Serializers
 			return ptr;
 		}
 
-		private object NullableDesirialize(BufferPtr ptr, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
+		private unsafe object NullableDesirialize(BufferPtr ptr, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
 			object entity = FormatterServices.GetSafeUninitializedObject(_typeInfo.Type);
 			byte[] objectBytes = ptr.Read();
 			int bytesRead = 0;
-			BitSerializer BitSerializer = BitSerializer.GetInstanse(typeof(bool));
+			BitSerializer boolSerializer = BitSerializer.GetInstanse(typeof(bool));
+			bool isHasValue = (bool)boolSerializer.Deserialize(objectBytes, bytesRead);
+			bytesRead++;
+			if(isHasValue)
+			{
+				var elementTypeInfo = TypeInfo.instanse(_typeInfo.Type.GenericTypeArguments[0]);
+				if(elementTypeInfo.IsPrimitive || !elementTypeInfo.IsHasReference)
+				{
+					return BitSerializer.GetInstanse(elementTypeInfo.Type).Deserialize(objectBytes, bytesRead);
+				}
+				else
+				{
+					int elementLenght = objectBytes.Length - bytesRead;
+					var elementPtr = buffer.GetPtr(ptr.position + bytesRead, elementLenght);
+					return Instance(elementTypeInfo.Type).ReferenceDesirialize(elementPtr, buffer, referenceMaping);
+				}
+			}
+			return null;
 		}
 
 		private object ReferenceTypeDesirialize(byte[] entityBytes)

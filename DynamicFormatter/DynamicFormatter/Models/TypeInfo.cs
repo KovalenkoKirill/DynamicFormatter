@@ -108,7 +108,7 @@ namespace DynamicFormatter
 			{
 				if(_isNullable == null)
 				{
-					if(IsValueType && IsGeneric && Type == typeof(Nullable<>))
+					if(IsValueType && IsGeneric && Type.GetGenericTypeDefinition() == typeof(Nullable<>))
 					{
 						_isNullable = true;
 					}
