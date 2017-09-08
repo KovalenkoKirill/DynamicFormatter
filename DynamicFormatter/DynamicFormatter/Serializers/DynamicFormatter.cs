@@ -20,10 +20,11 @@ namespace DynamicFormatter.Serializers
 		public static DynamicFormatter Instance(Type type)
 		{
 			DynamicFormatter instanse;
-			if (!_instances.TryGetValue(type.GetHashCode(), out instanse))
+			int hash = RuntimeHelpers.GetHashCode(type);
+			if (!_instances.TryGetValue(hash, out instanse))
 			{
 				instanse = new DynamicFormatter(type);
-				_instances.Add(type.GetHashCode(), instanse);
+				_instances.Add(hash, instanse);
 			}
 			return instanse;
 		}

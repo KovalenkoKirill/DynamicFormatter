@@ -18,8 +18,8 @@ namespace DynamicFormatter
 		public static TypeInfo instanse(Type type)
 		{
 			TypeInfo typeInfo = null;
-			int hashCode = type.GetHashCode();
-			if (!typeInfoDictionary.TryGetValue(type.GetHashCode(), out typeInfo))
+			int hashCode = RuntimeHelpers.GetHashCode(type);
+			if (!typeInfoDictionary.TryGetValue(hashCode, out typeInfo))
 			{
 				typeInfo = new TypeInfo(type);
 				typeInfoDictionary.Add(hashCode, typeInfo);
@@ -277,7 +277,7 @@ namespace DynamicFormatter
 
 		public override int GetHashCode()
 		{
-			return _type.GetHashCode();
+			return RuntimeHelpers.GetHashCode(_type);
 		}
 
 		#endregion Method

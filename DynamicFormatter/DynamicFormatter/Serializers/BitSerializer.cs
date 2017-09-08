@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace DynamicFormatter.Serializers
@@ -11,10 +12,11 @@ namespace DynamicFormatter.Serializers
 		public static BitSerializer GetInstanse(Type t)
 		{
 			BitSerializer instanse;
-			if (!innerLIst.TryGetValue(t.GetHashCode(), out instanse))
+			int hash = RuntimeHelpers.GetHashCode(t);
+			if (!innerLIst.TryGetValue(hash, out instanse))
 			{
 				instanse = new BitSerializer(t);
-				innerLIst.Add(t.GetHashCode(), instanse);
+				innerLIst.Add(hash, instanse);
 			}
 			return instanse;
 		}
