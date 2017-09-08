@@ -32,6 +32,12 @@ namespace DynamicFormatter
 			{
 				return containsSize;
 			}
+			if(type.IsEnum)
+			{
+				containsSize = basedTypeSize[typeof(int).GetHashCode()];
+				basedTypeSize.Add(type.GetHashCode(), containsSize);
+				return containsSize;
+			}
 			else
 			{
 				int size = Marshal.SizeOf(type);

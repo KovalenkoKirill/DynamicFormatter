@@ -35,7 +35,7 @@ namespace DynamicFormatter.Models
 		{
 			int currentPtr = size;
 			size += Count;
-			TryResize(Count);
+			TryResize(size);
 			return new BufferPtr(this, currentPtr, Count);
 		}
 
@@ -74,7 +74,6 @@ namespace DynamicFormatter.Models
 				byte[] nextBuffer = new byte[lenghtNeeded * 2];
 				BlockCopy(bytes, 0, nextBuffer, 0, bytes.Length);
 				bytes = nextBuffer;
-				size = lenghtNeeded;
 			}
 		}
 

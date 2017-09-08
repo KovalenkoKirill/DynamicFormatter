@@ -154,7 +154,7 @@ namespace DynamicFormatter.Serializers
 					return buffer;
 				};
 			}
-			else if (type == typeof(int))
+			else if (type == typeof(int) || type.IsEnum)
 			{
 				Deserialize = (buffer, offset) =>
 				{

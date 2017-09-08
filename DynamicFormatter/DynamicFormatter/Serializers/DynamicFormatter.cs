@@ -203,7 +203,7 @@ namespace DynamicFormatter.Serializers
 
 		private BufferPtr ReferenceSerizlize(object Entity, DynamicBuffer buffer, Dictionary<object, BufferPtr> referenceMaping)
 		{
-			if (!_typeInfo.IsValueType)
+			if (!_typeInfo.IsValueType && Entity != null)
 			{
 				if (referenceMaping.ContainsKey(Entity))
 				{
@@ -240,7 +240,9 @@ namespace DynamicFormatter.Serializers
 					currentPadding += memberBytes.Length;
 					continue;
 				}
-				else if (!memberTypeInfo.IsValueType && referenceMaping.ContainsKey(value))
+				else if (!memberTypeInfo.IsValueType 
+						&& value != null
+						&& referenceMaping.ContainsKey(value))
 				{
 					var objectptr = referenceMaping[value];
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
@@ -248,7 +250,7 @@ namespace DynamicFormatter.Serializers
 					currentPadding += memberBytes.Length;
 					continue;
 				}
-				else
+				else if(value != null)
 				{
 					var objectptr = Instance(memberTypeInfo.Type).ReferenceSerizlize(value, buffer, referenceMaping);
 					var memberBytes = BitConverter.GetBytes(objectptr.position);

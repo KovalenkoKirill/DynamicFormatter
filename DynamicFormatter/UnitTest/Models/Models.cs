@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace UnitTest.Models
 {
+	public enum TestEnum
+	{
+		fist,
+		second
+	}
+
 	[Serializable]
 	internal struct TestStructWithReference
 	{

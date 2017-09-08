@@ -14,6 +14,15 @@ namespace UnitTest
 	{
 		private const int iterationCount = 1000000;
 
+		[TestMethod]
+		public void DynamicFormatterEnumTest()
+		{
+			var enumVal = TestEnum.second;
+			var DynamicFormatter = new DynamicFormatter<TestEnum>();
+			var buffer = DynamicFormatter.Serialize(enumVal);
+			var resultTime = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(enumVal, resultTime);
+		}
 
 		[TestMethod]
 		public void DynamicFormatterDateTimeTest()
