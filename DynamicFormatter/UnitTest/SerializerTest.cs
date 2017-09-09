@@ -1,8 +1,10 @@
 ﻿using DynamicFormatter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnitTest.Models;
@@ -13,6 +15,74 @@ namespace UnitTest
 	public class SerializerTest
 	{
 		private const int iterationCount = 1000000;
+
+		[TestMethod]
+		public void DynamicFormatterDictionary()
+		{
+			var entity = new Dictionary<int, int>();
+			entity.Add(10, 9);
+			entity.Add(50, 12);
+
+			var DynamicFormatter = new DynamicFormatter<Dictionary<int, int>>();
+			var buffer = DynamicFormatter.Serialize(entity);
+			var result = DynamicFormatter.Deserialize(buffer);
+			for (int i = 0; i < entity.Count; i++)
+			{
+				Assert.AreEqual(result[i], entity[i]);
+			}
+		}
+
+		[TestMethod]
+		public void DynamicFormatterGenericInt()
+		{
+			var entity = new int[]
+			{
+				10,
+				20,
+				30
+			}.ToList();
+
+			var DynamicFormatter = new DynamicFormatter<List<int>>();
+			var buffer = DynamicFormatter.Serialize(entity);
+			var result = DynamicFormatter.Deserialize(buffer);
+			for(int i = 0; i < entity.Count;i++)
+			{
+				Assert.AreEqual(result[i], entity[i]);
+			}
+		}
+
+		[TestMethod]
+		public void DynamicFormatterGenericClass()
+		{
+			var entity = new ClassWithNullable[]
+			{
+				new ClassWithNullable(),
+				new ClassWithNullable(),
+				new ClassWithNullable()
+			}.ToList();
+
+			var DynamicFormatter = new DynamicFormatter<List<ClassWithNullable>>();
+			var buffer = DynamicFormatter.Serialize(entity);
+			var result = DynamicFormatter.Deserialize(buffer);
+			for (int i = 0; i < entity.Count; i++)
+			{
+				Assert.AreEqual(result[i].longNullable, entity[i].longNullable);
+			}
+		}
+
+		[TestMethod]
+		public void DynamicFormatterClassWithNullableTest()
+		{
+			var entity = new ClassWithNullable();
+			entity.intNullable = 31;
+			entity.longNullable = 313;
+			var DynamicFormatter = new DynamicFormatter<ClassWithNullable>();
+			var buffer = DynamicFormatter.Serialize(entity);
+			var result = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(entity.intNullable, result.intNullable);
+			Assert.AreEqual(entity.longNullable, result.longNullable);
+			Assert.IsTrue(result.boolNulable == null);
+		}
 
 		[TestMethod]
 		public void DynamicFormatterEnumTest()

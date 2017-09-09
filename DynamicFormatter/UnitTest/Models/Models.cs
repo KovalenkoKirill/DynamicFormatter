@@ -10,6 +10,16 @@ namespace UnitTest.Models
 	}
 
 	[Serializable]
+	internal class ClassWithNullable
+	{
+		public bool? boolNulable;
+
+		public int? intNullable;
+
+		public long? longNullable;
+	}
+
+	[Serializable]
 	internal struct TestStructWithReference
 	{
 		public int R { get; set; }

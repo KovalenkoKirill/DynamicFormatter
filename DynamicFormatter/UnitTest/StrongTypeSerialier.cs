@@ -17,7 +17,6 @@ namespace UnitTest
 	{
 		private const int iterationCount = 1000000;
 
-
 		[TestMethod]
 		public void StrongTypeFormatterDateTimeTest()
 		{
@@ -42,10 +41,14 @@ namespace UnitTest
 		public void StrongTypeFormatterNullableWhenNullTest()
 		{
 			Nullable<bool> testEntity = null;
-			var strongTypeFormatter = new StrongTypeFormatter();
-			var buffer = strongTypeFormatter.Serialize(testEntity);
-			var resultEntity = strongTypeFormatter.Deserialize(buffer);
-			Assert.AreEqual(testEntity, resultEntity);
+			try
+			{
+				var strongTypeFormatter = new StrongTypeFormatter();
+				var buffer = strongTypeFormatter.Serialize(testEntity);
+				var resultEntity = strongTypeFormatter.Deserialize(buffer);
+				Assert.Fail($"Serialize null value");
+			}
+			catch { }
 		}
 
 		[TestMethod]
