@@ -230,9 +230,11 @@ namespace DynamicFormatter.Serializers
 				{
 					BlockCopy(nullPtrBytres, 0, current, currentPadding, nullPtrBytres.Length);
 					currentPadding += nullPtrBytres.Length;
+					continue;
 				}
-				if (memberTypeInfo.IsValueType &&
-				(memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
+				if (memberTypeInfo.IsValueType 
+				&& !memberTypeInfo.isNullable
+				&& (memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberTypeInfo.Type);
 					var memberBytes = BitSerializer.Serialize(value);
@@ -240,7 +242,7 @@ namespace DynamicFormatter.Serializers
 					currentPadding += memberBytes.Length;
 					continue;
 				}
-				else if (!memberTypeInfo.IsValueType 
+				if (!memberTypeInfo.IsValueType 
 						&& value != null
 						&& referenceMaping.ContainsKey(value))
 				{
@@ -250,7 +252,7 @@ namespace DynamicFormatter.Serializers
 					currentPadding += memberBytes.Length;
 					continue;
 				}
-				else if(value != null)
+				if(value != null)
 				{
 					var objectptr = Instance(memberTypeInfo.Type).ReferenceSerizlize(value, buffer, referenceMaping);
 					var memberBytes = BitConverter.GetBytes(objectptr.position);
@@ -354,8 +356,9 @@ namespace DynamicFormatter.Serializers
 			foreach (var member in _typeInfo.Fields)
 			{
 				var memberTypeInfo = TypeInfo.instanse(member.FieldType);
-				if (memberTypeInfo.IsValueType &&
-				   (memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
+				if (memberTypeInfo.IsValueType 
+					&&! memberTypeInfo.isNullable
+				    && (memberTypeInfo.IsPrimitive || !memberTypeInfo.IsHasReference))
 				{
 					BitSerializer BitSerializer = BitSerializer.GetInstanse(memberTypeInfo.Type);
 					int size = memberTypeInfo.Type.SizeOfPrimitive();
@@ -373,11 +376,11 @@ namespace DynamicFormatter.Serializers
 				else
 				{
 					short refPosition = BitConverter.ToInt16(objectBytes, bytesRead);
+					bytesRead += PtrSize;
 					if (refPosition == -1)
 					{
 						continue;
 					}
-					bytesRead += PtrSize;
 					var Serializer = Instance(memberTypeInfo.Type);
 					var refPtr = buffer.GetPtr(refPosition, memberTypeInfo.Size);
 					object obj;

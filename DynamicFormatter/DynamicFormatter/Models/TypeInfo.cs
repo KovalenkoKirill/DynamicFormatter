@@ -256,7 +256,7 @@ namespace DynamicFormatter
 				{
 					size += innerMembreTypeInfo.Type.SizeOfPrimitive();
 				}
-				else if (innerMembreTypeInfo.IsValueType)
+				else if (innerMembreTypeInfo.IsValueType && !innerMembreTypeInfo.isNullable)
 				{
 					if (innerMembreTypeInfo.IsHasReference)
 					{
