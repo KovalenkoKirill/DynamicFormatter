@@ -14,7 +14,7 @@ namespace UnitTest
 	[TestClass]
 	public class SerializerTest
 	{
-		private const int iterationCount = 1000000;
+		private const int iterationCount = 10;
 
 		[TestMethod]
 		public void DynamicFormatterDictionary()

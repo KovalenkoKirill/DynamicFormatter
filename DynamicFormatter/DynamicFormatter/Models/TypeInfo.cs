@@ -1,4 +1,7 @@
 ﻿using DynamicFormatter.enums;
+using DynamicFormatter.Extentions;
+using DynamicFormatter.interfaces;
+using DynamicFormatter.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +9,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static DynamicFormatter.Serializers.DynamicFormatter;
+using static DynamicFormatter.ReflectionUtils;
+using DynamicFormatter.TypeResovers;
 
 namespace DynamicFormatter
 {
@@ -29,19 +34,28 @@ namespace DynamicFormatter
 
 		#endregion instanse
 
-		#region StaticCounstuctor
+		#region StaticConstuctor
 
 		static TypeInfo()
 		{
+			// hack for string
 			var typeInfo = new TypeInfo(typeof(string));
 			typeInfo._isArrayType = NullableBool.True;
 			typeInfo._elementTypeInfo = typeof(char);
-			typeInfoDictionary.Add(typeof(string).GetHashCode(), typeInfo);
+			typeInfo._resolver = new StringResolver(typeInfo);
+			typeInfoDictionary.Add(RuntimeHelpers.GetHashCode(typeof(string)), typeInfo);
+
+			// dateTime
+			var dateTime = new TypeInfo(typeof(DateTime));
+			dateTime._size = sizeof(long);
+			typeInfoDictionary.Add(RuntimeHelpers.GetHashCode(typeof(DateTime)), dateTime);
 		}
 
 		#endregion StaticCounstuctor
 
 		#region members
+
+		private Dictionary<int, GetterAndSetter> _accessMethods;
 
 		private Type _type;
 
@@ -63,6 +77,10 @@ namespace DynamicFormatter
 
 		private Type _elementTypeInfo;
 
+		private bool? _isEnum;
+
+		private ITypeResolver _resolver;
+
 		#endregion members
 
 		#region constructor
@@ -70,11 +88,59 @@ namespace DynamicFormatter
 		private TypeInfo(Type type)
 		{
 			this._type = type;
+			if(IsPrimitive || IsEnum)
+			{
+				_resolver = new BaseTypeResolver(this);
+			}
+			else if(!IsHasReference && !isNullable && !IsArray && IsValueType)
+			{
+				_resolver = new BaseTypeResolver(this);
+			}
+			else if(IsArray)
+			{
+				_resolver = new ArrayTypeResolver(this);
+			}
+			else
+			{
+				initAccessField();
+				if (isNullable)
+				{
+					_resolver = new NullableTypeResolver(this);
+				}
+				else
+				{
+					_resolver = new ReferenceTypeResolver(this);
+				}
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void initAccessField()
+		{
+			_accessMethods = new Dictionary<int, GetterAndSetter>();
+			foreach (var field in Fields)
+			{
+				_accessMethods.Add(RuntimeHelpers.GetHashCode(field),
+				new GetterAndSetter()
+				{
+					Getter = CreateInstanceFieldGetter(field),
+					Setter = CreateInstanceFieldSetter(field)
+				});
+			}
 		}
 
 		#endregion constructor
 
 		#region Property
+
+
+		public ITypeResolver Resolver
+		{
+			get
+			{
+				return _resolver;
+			}
+		}
 
 		public Type Type
 		{
@@ -99,6 +165,18 @@ namespace DynamicFormatter
 						 .ToList();
 				}
 				return _fields;
+			}
+		}
+
+		public bool IsEnum
+		{
+			get
+			{
+				if(_isEnum == null)
+				{
+					_isEnum = Type.IsEnum;
+				}
+				return (bool)_isEnum;
 			}
 		}
 
@@ -205,6 +283,20 @@ namespace DynamicFormatter
 			}
 		}
 
+		public int SizeInBuffer
+		{
+			get
+			{
+				if (IsPrimitive
+				||
+				(IsValueType &&
+				(!IsHasReference && !isNullable)))
+				{
+					return Size;
+				}
+				return Сonstants.PtrSize;
+			}
+		}
 		#endregion Property
 
 		#region Method
@@ -237,40 +329,40 @@ namespace DynamicFormatter
 			return false;
 		}
 
+		#region FieldAccess
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal object GetValue(object entity, FieldInfo member)
+		{
+			return _accessMethods[RuntimeHelpers.GetHashCode(member)].Getter.Invoke(entity);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void SetValue(object entity, object value, FieldInfo member)
+		{
+			_accessMethods[RuntimeHelpers.GetHashCode(member)].Setter.Invoke(entity, value);
+		}
+
+		#endregion
+
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int GetSize()
 		{
 			int size = 0;
-			if (IsPrimitive)
+			if(IsPrimitive || IsEnum)
 			{
 				return _type.SizeOfPrimitive();
 			}
-			else if (IsArray)
+			else if (!IsHasReference && IsValueType && !isNullable)
 			{
-				return PtrSize;
+				return Marshal.SizeOf(_type);
 			}
-			foreach (var innerMember in _fields)
+			size++;
+			foreach(var innerMember in _fields)
 			{
 				var innerMembreTypeInfo = instanse(innerMember.FieldType);
-				if (innerMembreTypeInfo.IsPrimitive)
-				{
-					size += innerMembreTypeInfo.Type.SizeOfPrimitive();
-				}
-				else if (innerMembreTypeInfo.IsValueType && !innerMembreTypeInfo.isNullable)
-				{
-					if (innerMembreTypeInfo.IsHasReference)
-					{
-						size += PtrSize;
-					}
-					else
-					{
-						size += innerMembreTypeInfo.Type.SizeOfPrimitive();
-					}
-				}
-				else
-				{
-					size += PtrSize;
-				}
+				size += innerMembreTypeInfo.SizeInBuffer;
 			}
 			return size;
 		}

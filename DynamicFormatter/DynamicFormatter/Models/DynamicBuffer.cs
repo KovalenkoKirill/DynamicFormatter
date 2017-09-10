@@ -57,6 +57,14 @@ namespace DynamicFormatter.Models
 			return point;
 		}
 
+		public byte[] CurrentBuffer
+		{
+			get
+			{
+				return bytes;
+			}
+		}
+
 		public byte[] Buffer
 		{
 			get

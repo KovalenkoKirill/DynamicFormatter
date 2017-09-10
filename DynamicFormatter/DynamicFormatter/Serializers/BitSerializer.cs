@@ -72,7 +72,7 @@ namespace DynamicFormatter.Serializers
 				{
 					fixed (byte* ptr = buffer)
 					{
-						return *(bool*)(ptr);
+						return *(bool*)(ptr + offset);
 					}
 				};
 				Serialize = (entity) =>
