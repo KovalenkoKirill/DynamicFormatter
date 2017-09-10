@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using PerformanceComparison.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -38,6 +39,7 @@ namespace PerformanceComparison
 				Console.WriteLine($"3: Just int");
 				Console.WriteLine($"4: Class with inner class");
 				Console.WriteLine($"5: CrossReference class");
+				Console.WriteLine($"6: Dictionary");
 				try
 				{
 					line = Console.ReadKey().KeyChar.ToString();
@@ -83,6 +85,14 @@ namespace PerformanceComparison
 						case "5":
 							SerializeTest<CrossReferenceClass>(new CrossReferenceClass(), iterationCount);
 							break;
+						case "6":
+							var dictionary = new Dictionary<int, int>();
+							for(int i = 0;i<100;i++)
+							{
+								dictionary.Add(i, i * 100);
+							}
+							SerializeTest(dictionary, iterationCount);
+							break;
 					}
 				}
 				catch (Exception ex)
@@ -94,6 +104,7 @@ namespace PerformanceComparison
 
 		public static void SerializeTest<T>(T entity, int iterationCount)
 		{
+			Console.WriteLine();
 			long serilizationResult = 0;
 			long desirilizationResult = 0;
 			int objectSize = 0;
