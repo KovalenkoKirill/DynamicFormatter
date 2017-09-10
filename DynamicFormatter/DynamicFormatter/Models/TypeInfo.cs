@@ -130,12 +130,24 @@ namespace DynamicFormatter
 			_accessMethods = new Dictionary<int, GetterAndSetter>();
 			foreach (var field in Fields)
 			{
-				_accessMethods.Add(RuntimeHelpers.GetHashCode(field),
-				new GetterAndSetter()
+				if (IsValueType)
 				{
-					Getter = CreateInstanceFieldGetter(field),
-					Setter = CreateInstanceFieldSetter(field)
-				});
+					_accessMethods.Add(RuntimeHelpers.GetHashCode(field),
+					new GetterAndSetter()
+					{
+						Getter = CreateInstanceFieldGetter(field),
+						SetterForValueType = CreateInstanceFieldSetterForValueType(field)
+					});
+				}
+				else
+				{
+					_accessMethods.Add(RuntimeHelpers.GetHashCode(field),
+					new GetterAndSetter()
+					{
+						Getter = CreateInstanceFieldGetter(field),
+						Setter = CreateInstanceFieldSetter(field)
+					});
+				}
 			}
 		}
 
@@ -360,14 +372,17 @@ namespace DynamicFormatter
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void SetValue(object entity, object value, FieldInfo member)
+		internal object SetValue(object entity, object value, FieldInfo member)
 		{
-			if(IsGeneric)
+			if (!IsValueType)
 			{
-				member.SetValue(entity, value);
-				return;
+				_accessMethods[RuntimeHelpers.GetHashCode(member)].Setter.Invoke(entity, value);
+				return entity;
 			}
-			_accessMethods[RuntimeHelpers.GetHashCode(member)].Setter.Invoke(entity, value);
+			else
+			{
+				return _accessMethods[RuntimeHelpers.GetHashCode(member)].SetterForValueType.Invoke(entity, value);
+			}
 		}
 
 		#endregion

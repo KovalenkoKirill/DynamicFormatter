@@ -51,7 +51,7 @@ namespace DynamicFormatter.TypeResovers
 			{
 				var memberTypeInfo = TypeInfo.instanse(member.FieldType);
 				object innerObject = memberTypeInfo.Resolver.Desirialize(position, buffer, referenceMaping);
-				typeInfo.SetValue(entity, innerObject, member);
+				entity = typeInfo.SetValue(entity, innerObject, member);
 				position += (short)memberTypeInfo.SizeInBuffer;
 			}
 			return entity;

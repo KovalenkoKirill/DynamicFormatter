@@ -79,8 +79,6 @@ namespace DynamicFormatter.TypeResovers
 
 			objectBuffer[0] = (byte)ObjectFlag.AbstractClass;
 
-			referenceMaping.Add(Entity, ptr);
-
 			int positionInBuffer = 1;
 
 			#region save information about type in  buffer
