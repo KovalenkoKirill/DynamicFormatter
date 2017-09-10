@@ -81,6 +81,8 @@ namespace DynamicFormatter
 
 		private ITypeResolver _resolver;
 
+		private bool? _isAbstactClass;
+
 		#endregion members
 
 		#region constructor
@@ -92,13 +94,21 @@ namespace DynamicFormatter
 			{
 				_resolver = new BaseTypeResolver(this);
 			}
-			else if(!IsHasReference && !isNullable && !IsArray && IsValueType)
+			else if(!IsHasReference 
+				&& !isNullable 
+				&& !IsArray 
+				&& IsValueType
+				&& !IsGeneric)
 			{
 				_resolver = new BaseTypeResolver(this);
 			}
 			else if(IsArray)
 			{
 				_resolver = new ArrayTypeResolver(this);
+			}
+			else if(IsAbstactClass)
+			{
+				_resolver = new AbstractClassResolver(this);
 			}
 			else
 			{
@@ -165,6 +175,18 @@ namespace DynamicFormatter
 						 .ToList();
 				}
 				return _fields;
+			}
+		}
+
+		public bool IsAbstactClass
+		{
+			get
+			{
+				if(_isAbstactClass == null)
+				{
+					_isAbstactClass = _type.IsAbstract;
+				}
+				return (bool)_isAbstactClass;
 			}
 		}
 
@@ -289,8 +311,8 @@ namespace DynamicFormatter
 			{
 				if (IsPrimitive
 				||
-				(IsValueType &&
-				(!IsHasReference && !isNullable)))
+				(IsValueType && !IsGeneric
+				&& (!IsHasReference && !isNullable)))
 				{
 					return Size;
 				}
@@ -340,6 +362,11 @@ namespace DynamicFormatter
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetValue(object entity, object value, FieldInfo member)
 		{
+			if(IsGeneric)
+			{
+				member.SetValue(entity, value);
+				return;
+			}
 			_accessMethods[RuntimeHelpers.GetHashCode(member)].Setter.Invoke(entity, value);
 		}
 
@@ -354,7 +381,14 @@ namespace DynamicFormatter
 			{
 				return _type.SizeOfPrimitive();
 			}
-			else if (!IsHasReference && IsValueType && !isNullable)
+			if (IsAbstactClass)
+			{
+				return size = 1 + (Сonstants.PtrSize * 2);
+			}
+			else if (!IsHasReference 
+					&& IsValueType 
+					&& !isNullable
+					&& !IsGeneric)
 			{
 				return Marshal.SizeOf(_type);
 			}

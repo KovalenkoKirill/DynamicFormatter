@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using static DynamicFormatter.Extentions.TypeFinder;
 
 namespace DynamicFormatter.Serializers
 { 
@@ -61,28 +62,7 @@ namespace DynamicFormatter.Serializers
 			var typeStr = Encoding.GetEncoding("utf-8").GetString(typeBytes);
 
 			// type of entity
-			Type entityType = null;
-
-			int hashCode = typeStr.GetHashCode();
-
-			if(!types.TryGetValue(hashCode,out entityType))
-			{
-				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-				{
-					entityType = assembly.GetType(typeStr, false, true);
-					if (entityType != null)
-					{
-						break;
-					}
-				}
-
-				if (entityType == null)
-				{
-					throw new BadImageFormatException($"Type {typeStr} not found");
-				}
-
-				types.Add(typeStr.GetHashCode(), entityType);
-			}
+			Type entityType = FindType(typeStr);
 
 			// buffer for entity
 			byte[] entiyBytes = new byte[bytes.Length - padding];

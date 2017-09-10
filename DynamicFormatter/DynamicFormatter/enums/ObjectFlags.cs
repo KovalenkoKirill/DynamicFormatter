@@ -8,6 +8,7 @@ namespace DynamicFormatter.enums
 {
 	internal enum ObjectFlag : byte
 	{
-		Normal
+		Normal,
+		AbstractClass
 	}
 }

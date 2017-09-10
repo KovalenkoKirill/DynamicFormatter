@@ -14,7 +14,7 @@ namespace UnitTest
 	[TestClass]
 	public class SerializerTest
 	{
-		private const int iterationCount = 10;
+		private const int iterationCount = 1000000;
 
 		[TestMethod]
 		public void DynamicFormatterDictionary()
@@ -26,9 +26,9 @@ namespace UnitTest
 			var DynamicFormatter = new DynamicFormatter<Dictionary<int, int>>();
 			var buffer = DynamicFormatter.Serialize(entity);
 			var result = DynamicFormatter.Deserialize(buffer);
-			for (int i = 0; i < entity.Count; i++)
+			foreach(var keyValue in entity)
 			{
-				Assert.AreEqual(result[i], entity[i]);
+				Assert.AreEqual(keyValue.Value, result[keyValue.Key]);
 			}
 		}
 

@@ -47,6 +47,7 @@
     <Compile Include="enums\StartupBehavior.cs" />
     <Compile Include="Extentions\BaseTypeSizeHelper.cs" />
     <Compile Include="Extentions\ReflectionUtils.cs" />
+    <Compile Include="Extentions\TypeFinder.cs" />
     <Compile Include="Extentions\Сonstants.cs" />
     <Compile Include="interfaces\ITypeResolver.cs" />
     <Compile Include="Models\TypeInfo.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Serializers\DynamicFormatter.cs" />
     <Compile Include="Serializers\DynamicFormatterT.cs" />
     <Compile Include="Serializers\StrongTypeFormatter.cs" />
+    <Compile Include="TypeResovers\AbstractClassResolver.cs" />
     <Compile Include="TypeResovers\ArrayTypeResolver.cs" />
     <Compile Include="TypeResovers\BaseTypeResolver.cs" />
     <Compile Include="TypeResovers\NullableTypeResolver.cs" />
