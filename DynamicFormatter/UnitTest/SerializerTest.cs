@@ -17,6 +17,15 @@ namespace UnitTest
 		private const int iterationCount = 100;
 
 		[TestMethod]
+		public void CrossReferenceClass()
+		{
+			var entity = new CrossReferenceClass();
+			var DynamicFormatter = new DynamicFormatter<CrossReferenceClass>();
+			var buffer = DynamicFormatter.Serialize(entity);
+			var result = DynamicFormatter.Deserialize(buffer);
+		}
+
+		[TestMethod]
 		public void DynamicFormatterInterface()
 		{
 			var entity = new Dictionary<int, int>();

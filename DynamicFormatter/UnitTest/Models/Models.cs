@@ -10,6 +10,27 @@ namespace UnitTest.Models
 	}
 
 	[Serializable]
+	internal class CrossReferenceClass
+	{
+		Inner inner;
+
+		public CrossReferenceClass()
+		{
+			inner = new Inner(this);
+		}
+
+		class Inner
+		{
+			CrossReferenceClass val;
+
+			public Inner(CrossReferenceClass val)
+			{
+				this.val = val;	
+			}
+		}
+	}
+
+	[Serializable]
 	internal class ClassWithNullable
 	{
 		public bool? boolNulable;

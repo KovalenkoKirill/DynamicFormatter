@@ -94,11 +94,11 @@ namespace DynamicFormatter
 			{
 				_resolver = new BaseTypeResolver(this);
 			}
-			else if(!IsHasReference 
-				&& !isNullable 
+			else if(!isNullable 
 				&& !IsArray 
 				&& IsValueType
-				&& !IsGeneric)
+				&& !IsGeneric
+				&& !IsHasReference)
 			{
 				_resolver = new BaseTypeResolver(this);
 			}
@@ -321,6 +321,10 @@ namespace DynamicFormatter
 		{
 			get
 			{
+				if(!IsValueType)
+				{
+					return Сonstants.PtrSize;
+				}
 				if (IsPrimitive
 				||
 				(IsValueType && !IsGeneric
