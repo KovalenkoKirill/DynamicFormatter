@@ -83,6 +83,8 @@ namespace DynamicFormatter
 
 		private bool? _isAbstactClass;
 
+		private int? _sizeInBuffer;
+
 		#endregion members
 
 		#region constructor
@@ -128,7 +130,10 @@ namespace DynamicFormatter
 		private void initAccessField()
 		{
 			_accessMethods = new Dictionary<int, GetterAndSetter>();
-			foreach (var field in Fields)
+
+			var fields = Fields;
+
+			foreach (var field in fields)
 			{
 				if (IsValueType)
 				{
@@ -321,18 +326,25 @@ namespace DynamicFormatter
 		{
 			get
 			{
-				if(!IsValueType)
+				if (_sizeInBuffer == null)
 				{
-					return Сonstants.PtrSize;
+					if (!IsValueType)
+					{
+						_sizeInBuffer = Сonstants.PtrSize;
+					}
+					else if (IsPrimitive
+					||
+					(IsValueType && !IsGeneric
+					&& (!IsHasReference && !isNullable)))
+					{
+						_sizeInBuffer = Size;
+					}
+					else
+					{
+						_sizeInBuffer = Сonstants.PtrSize;
+					}
 				}
-				if (IsPrimitive
-				||
-				(IsValueType && !IsGeneric
-				&& (!IsHasReference && !isNullable)))
-				{
-					return Size;
-				}
-				return Сonstants.PtrSize;
+				return _sizeInBuffer.Value;
 			}
 		}
 		#endregion Property
