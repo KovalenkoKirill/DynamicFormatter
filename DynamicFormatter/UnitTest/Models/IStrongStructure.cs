@@ -1,4 +1,5 @@
-﻿using ProtoBuf;
+﻿using MessagePack;
+using ProtoBuf;
 using System;
 
 namespace UnitTest.Models
@@ -19,21 +20,27 @@ namespace UnitTest.Models
 
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
+	[MessagePackObject]
 	public class StrongStructure : IStrongStructure
 	{
 		[ProtoMember(1)]
+		[Key(0)]
 		public bool p1 { get; set; }
 
 		[ProtoMember(2)]
+		[Key(1)]
 		public Guid p2 { get; set; }
 
 		[ProtoMember(3)]
+		[Key(2)]
 		public string p3 { get; set; }
 
 		[ProtoMember(4)]
+		[Key(3)]
 		public c1 p4 { get; set; }
 
 		[ProtoMember(5)]
+		[Key(4)]
 		public int p5 { get; set; }
 
 		public StrongStructure()
@@ -48,6 +55,7 @@ namespace UnitTest.Models
 
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
+	[MessagePackObject]
 	public class c1
 	{
 		public c1()
@@ -72,59 +80,77 @@ namespace UnitTest.Models
 		}
 
 		[ProtoMember(1)]
+		[Key(0)]
 		public Guid p1 { get; set; }
 
 		[ProtoMember(2)]
+		[Key(1)]
 		public Guid p2 { get; set; }
 
 		[ProtoMember(3)]
+		[Key(2)]
 		public string p3 { get; set; }
 
 		[ProtoMember(5)]
+		[Key(3)]
 		public e1 p4 { get; set; }
 
 		[ProtoMember(6)]
+		[Key(4)]
 		public e2 p5 { get; set; }
 
 		[ProtoMember(7)]
+		[Key(5)]
 		public string p6 { get; set; }
 
 		[ProtoMember(8)]
+		[Key(6)]
 		public string p7 { get; set; }
 
 		[ProtoMember(9)]
+		[Key(7)]
 		public string p8 { get; set; }
 
 		[ProtoMember(10)]
+		[Key(8)]
 		public string p9 { get; set; }
 
 		[ProtoMember(11)]
+		[Key(9)]
 		public string p10 { get; set; }
 
 		[ProtoMember(12)]
+		[Key(10)]
 		public string p11 { get; set; }
 
 		[ProtoMember(13)]
+		[Key(11)]
 		public e3 p12 { get; set; }
 
 		[ProtoMember(14)]
+		[Key(12)]
 		public string p13 { get; set; }
 
 		[ProtoMember(15)]
+		[Key(13)]
 		public DateTime p14 { get; set; }
 
 		[ProtoMember(16)]
+		[Key(14)]
 		public Guid p15 { get; set; }
 
 		[ProtoMember(17)]
+		[Key(15)]
 		public c2 p16 { get; set; }
 
 		[ProtoMember(18)]
+		[Key(16)]
 		public c3 p17 { get; set; }
 	}
 
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
+	[MessagePackObject]
 	public class c2
 	{
 		public c2()
@@ -150,62 +176,81 @@ namespace UnitTest.Models
 		}
 
 		[ProtoMember(1)]
+		[Key(0)]
 		public string p1 { get; set; }
 
 		[ProtoMember(2)]
+		[Key(1)]
 		public string p2 { get; set; }
 
 		[ProtoMember(3)]
+		[Key(2)]
 		public c4 p3 { get; set; }
 
 		[ProtoMember(4)]
+		[Key(3)]
 		public c5 p4 { get; set; }
 
 		[ProtoMember(5)]
+		[Key(4)]
 		public string p5 { get; set; }
 
 		[ProtoMember(6)]
+		[Key(5)]
 		public long? p6 { get; set; }
 
 		[ProtoMember(7)]
+		[Key(6)]
 		public bool? p7 { get; set; }
 
 		[ProtoMember(8)]
+		[Key(7)]
 		public string p8 { get; set; }
 
 		[ProtoMember(9)]
+		[Key(8)]
 		public string p9 { get; set; }
 
 		[ProtoMember(10)]
+		[Key(9)]
 		public string p10 { get; set; }
 
 		[ProtoMember(11)]
+		[Key(10)]
 		public string p11 { get; set; }
 
 		[ProtoMember(12)]
+		[Key(11)]
 		public string p12 { get; set; }
 
 		[ProtoMember(13)]
+		[Key(12)]
 		public string p13 { get; set; }
 
 		[ProtoMember(14)]
+		[Key(13)]
 		public long? p14 { get; set; }
 
 		[ProtoMember(15)]
+		[Key(14)]
 		public int? p15 { get; set; }
 
 		[ProtoMember(16)]
+		[Key(15)]
 		public bool? p16 { get; set; }
 
 		[ProtoMember(17)]
+		[Key(16)]
 		public int? p17 { get; set; }
 
 		[ProtoMember(18)]
+		[Key(17)]
 		public int? p18 { get; set; }
 	}
 
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
+	[MessagePackObject]
 	public class c4
 	{
 		public c4()
@@ -216,15 +261,19 @@ namespace UnitTest.Models
 			p4 = DayOfWeek.Sunday;
 		}
 		[ProtoMember(1)]
+		[Key(0)]
 		public byte? p1 { get; set; }
 
 		[ProtoMember(2)]
+		[Key(1)]
 		public byte? p2 { get; set; }
 
 		[ProtoMember(3)]
+		[Key(2)]
 		public byte? p3 { get; set; }
 
 		[ProtoMember(4)]
+		[Key(3)]
 		public DayOfWeek? p4 { get; set; }
 	}
 
@@ -253,6 +302,7 @@ namespace UnitTest.Models
 
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
+	[MessagePackObject]
 	public class c5
 	{
 		public c5()
@@ -262,12 +312,15 @@ namespace UnitTest.Models
 			Day = 15;
 		}
 		[ProtoMember(1)]
+		[Key(0)]
 		public int Year { get; set; }
 
 		[ProtoMember(2)]
+		[Key(1)]
 		public int Month { get; set; }
 
 		[ProtoMember(3)]
+		[Key(2)]
 		public int Day { get; set; }
 	}
 
@@ -329,6 +382,7 @@ namespace UnitTest.Models
 
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
+	[MessagePackObject]
 	public class c3
 	{
 		public c3()
@@ -343,24 +397,31 @@ namespace UnitTest.Models
 		}
 
 		[ProtoMember(1)]
+		[Key(0)]
 		public string p1 { get; set; }
 
 		[ProtoMember(2)]
+		[Key(1)]
 		public string p2 { get; set; }
 
 		[ProtoMember(3)]
+		[Key(2)]
 		public string p3 { get; set; }
 
 		[ProtoMember(4)]
+		[Key(3)]
 		public string p4 { get; set; }
 
 		[ProtoMember(5)]
+		[Key(4)]
 		public string p5 { get; set; }
 
 		[ProtoMember(6)]
+		[Key(5)]
 		public string p6 { get; set; }
 
 		[ProtoMember(7)]
+		[Key(6)]
 		public string p7 { get; set; }
 	}
 }

@@ -18,6 +18,7 @@ namespace UnitTest
 	[TestClass]
 	public class ReflectionTest
 	{
+		#if DEBUG
 		[TestMethod]
 		public void TestGetterAndSetter()
 		{
@@ -76,48 +77,6 @@ namespace UnitTest
 			Assert.AreEqual(testGeneric.Val, 90);
 
 		}
-		[TestMethod]
-		public void TestSpeedCast()
-		{
-			var watch = Stopwatch.StartNew();
-			for (int i = 0; i < 1000000; i++)
-			{
-				var result = SafeCast(i);
-			}
-			watch.Stop();
-			Debug.WriteLine($"SafeCast {watch.ElapsedMilliseconds}");
-
-			watch = Stopwatch.StartNew();
-			for (int i = 0; i < 1000000; i++)
-			{
-				var result = UnsafeCast(i);
-			}
-			watch.Stop();
-			Debug.WriteLine($"UnsafeCast {watch.ElapsedMilliseconds}");
-		}
-
-		[TestMethod]
-		public void NullableReflection()
-		{
-			int? d = null;
-		}
-
-		public byte[] SafeCast(object entity)
-		{
-			return BitConverter.GetBytes((int)Convert.ChangeType(entity, typeof(int)));
-		}
-
-		public unsafe byte[] UnsafeCast(object entity)
-		{
-			int val = (int)entity;
-			int* ptr = &val;
-			int size = sizeof(int); ;
-			byte[] buffer = new byte[size];
-			fixed (byte* dest = buffer)
-			{
-				Buffer.MemoryCopy(ptr, dest, size, size);
-			}
-			return buffer;
-		}
+	#endif
 	}
 }

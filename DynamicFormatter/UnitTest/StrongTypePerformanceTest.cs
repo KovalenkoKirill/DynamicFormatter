@@ -1,4 +1,6 @@
-﻿using DynamicFormatter.Serializers;
+﻿using DynamicFormatter;
+using DynamicFormatter.Serializers;
+using MessagePack;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
@@ -15,12 +17,35 @@ using UnitTest.Models;
 namespace UnitTest
 {
 	/// <summary>
-	/// Dynamic formatter in debug mode
-	/// With optimization code it's will be better
+	/// For run this test switch to Release mode.
 	/// </summary>
 	[TestClass]
 	public class StrongTypePerformanceTest
 	{
+		public TestContext TestContext { get; set; }
+
+#if DEBUG
+		[TestMethod]
+		public void AdebugTest()
+		{
+			var entity = new StrongStructure();
+
+			var serializer = new DynamicFormatter<StrongStructure>();
+
+			var watch = Stopwatch.StartNew();
+
+			for (int i = 0; i < 50; i++)
+			{
+				var buffer = serializer.Serialize(entity);
+				var result = serializer.Deserialize(buffer);
+			}
+			watch.Stop();
+
+			long ms = watch.ElapsedMilliseconds;
+		}
+
+#else
+
 		[TestMethod]
 		public void TestPerfomenceStrongType()
 		{
@@ -52,8 +77,10 @@ namespace UnitTest
 			}
 			binaryWatch.Stop();
 
-			Assert.IsTrue(watch.ElapsedTicks < binaryWatch.ElapsedTicks,
-						$"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nBinaryFormatter {binaryWatch.ElapsedMilliseconds} ms");
+			var message = $"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nBinaryFormatter {binaryWatch.ElapsedMilliseconds} ms";
+
+			Assert.IsTrue(watch.ElapsedTicks < binaryWatch.ElapsedTicks, message);
+			TestContext.WriteLine(message);
 		}
 
 		[TestMethod]
@@ -81,16 +108,19 @@ namespace UnitTest
 			}
 			jsonWatch.Stop();
 
+			var message = $"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nJsonConvert {jsonWatch.ElapsedMilliseconds} ms";
+
 			Assert.IsTrue(watch.ElapsedTicks < jsonWatch.ElapsedTicks,
-						$"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nJsonConvert {jsonWatch.ElapsedMilliseconds} ms");
+						message);
+			TestContext.WriteLine(message);
 		}
 
 		[TestMethod]
 		public void TestPerfomenceStrongTypeWithProtoBuf()
 		{
-			IStrongStructure entity = new StrongStructure();
+			var entity = new StrongStructure();
 
-			StrongTypeFormatter serializer = new StrongTypeFormatter();
+			var serializer = new DynamicFormatter<StrongStructure>();
 
 			var watch = Stopwatch.StartNew();
 
@@ -101,6 +131,8 @@ namespace UnitTest
 			}
 			watch.Stop();
 
+			long ms = watch.ElapsedMilliseconds;
+
 			var protoBuf = Stopwatch.StartNew();
 
 			for (int i = 0; i < 1000; i++)
@@ -110,8 +142,49 @@ namespace UnitTest
 			}
 			protoBuf.Stop();
 
+			var message = $"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nprotoBuf {protoBuf.ElapsedMilliseconds} ms";
+
 			Assert.IsTrue(watch.ElapsedTicks < protoBuf.ElapsedTicks,
-						$"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nprotoBuf {protoBuf.ElapsedMilliseconds} ms");
+						message);
+
+			TestContext.WriteLine(message);
 		}
+
+		[TestMethod]
+		public void TestPerfomenceStrongTypeWithMsgPack()
+		{
+			var entity = new StrongStructure();
+
+			var serializer = new DynamicFormatter<StrongStructure>();
+
+			var watch = Stopwatch.StartNew();
+
+			for (int i = 0; i < 1000; i++)
+			{
+				var buffer = serializer.Serialize(entity);
+				var result = serializer.Deserialize(buffer);
+			}
+			watch.Stop();
+
+			long ms = watch.ElapsedMilliseconds;
+
+			var msgPackWatch = Stopwatch.StartNew();
+
+			for (int i = 0; i < 1000; i++)
+			{
+				var bin = MessagePackSerializer.Serialize(entity);
+
+				// Okay to deserialize immutable obejct
+				var point = MessagePackSerializer.Deserialize<StrongStructure>(bin);
+			}
+			msgPackWatch.Stop();
+
+			var message = $"StrongTypeFormatter {watch.ElapsedMilliseconds} ms\r\nMessagePackSerializer {msgPackWatch.ElapsedMilliseconds} ms";
+
+			Assert.IsTrue(watch.ElapsedTicks < msgPackWatch.ElapsedTicks, message);
+
+			TestContext.WriteLine(message);
+		}
+		#endif
 	}
 }
