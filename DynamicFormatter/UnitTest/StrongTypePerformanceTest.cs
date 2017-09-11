@@ -135,6 +135,11 @@ namespace UnitTest
 
 			var protoBuf = Stopwatch.StartNew();
 
+			{
+				var buffer = ProtoBufHelper.ProtoSerialize(entity);
+				var obj = ProtoBufHelper.ProtoDeserialize<StrongStructure>(buffer);
+			}
+
 			for (int i = 0; i < 1000; i++)
 			{
 				var buffer = ProtoBufHelper.ProtoSerialize(entity);
@@ -157,6 +162,11 @@ namespace UnitTest
 
 			var serializer = new DynamicFormatter<StrongStructure>();
 
+			{
+				var buffer = serializer.Serialize(entity);
+				var result = serializer.Deserialize(buffer);
+			}
+
 			var watch = Stopwatch.StartNew();
 
 			for (int i = 0; i < 1000; i++)
@@ -167,6 +177,13 @@ namespace UnitTest
 			watch.Stop();
 
 			long ms = watch.ElapsedMilliseconds;
+
+			{
+				var bin = MessagePackSerializer.Serialize(entity);
+
+				// Okay to deserialize immutable obejct
+				var point = MessagePackSerializer.Deserialize<StrongStructure>(bin);
+			}
 
 			var msgPackWatch = Stopwatch.StartNew();
 

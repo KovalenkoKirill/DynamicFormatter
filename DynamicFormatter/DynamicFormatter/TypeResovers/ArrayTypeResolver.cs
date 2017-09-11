@@ -63,12 +63,17 @@ namespace DynamicFormatter.TypeResovers
 				return Сonstants.nullPtrBytres;
 			}
 
+			if(referenceMaping.ContainsKey(entity))
+			{
+				return BitConverter.GetBytes(referenceMaping[entity].position);
+			}
+			
 			if (typeInfo.Type == typeof(string))
 			{
 				entity = ((string)entity).ToArray();
 			}
 
-			Array array = (Array)entity;
+			Array array = entity as Array;
 
 			var resolver = TypeInfo.instanse(typeInfo.ElementTypeInfo).Resolver;
 
@@ -77,6 +82,9 @@ namespace DynamicFormatter.TypeResovers
 			byte[] entityBuffer = new byte[size];
 
 			var ptr = buffer.Alloc(size);
+
+			referenceMaping.Add(entity, ptr);
+
 
 			int positionInBuffer = 0;
 
