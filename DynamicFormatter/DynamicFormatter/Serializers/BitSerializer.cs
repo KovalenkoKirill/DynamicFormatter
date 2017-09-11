@@ -336,7 +336,7 @@ namespace DynamicFormatter.Serializers
 				{
 					fixed (byte* ptr = buffer)
 					{
-						return *(double*)(ptr + offset);
+						return *(decimal*)(ptr + offset);
 					};
 				};
 				Serialize = (entity) =>

@@ -17,6 +17,37 @@ namespace UnitTest
 		private const int iterationCount = 100;
 
 		[TestMethod]
+		public void DynamicFormatterGenericDecimal()
+		{
+			var entity = new ChashedObject<decimal>();
+			entity.Value = 90.1M;
+			var DynamicFormatter = new DynamicFormatter<ChashedObject<decimal>>();
+			var buffer = DynamicFormatter.Serialize(entity);
+			var result = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(entity.Value, result.Value);
+		}
+
+		[TestMethod]
+		public void DynamicFormatterNullableEnumNull()
+		{
+			TestEnum? enumVal = null;
+			var DynamicFormatter = new DynamicFormatter<TestEnum?>();
+			var buffer = DynamicFormatter.Serialize(enumVal);
+			var result = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(enumVal, result);
+		}
+
+		[TestMethod]
+		public void DynamicFormatterNullableEnum()
+		{
+			TestEnum? enumVal = TestEnum.second;
+			var DynamicFormatter = new DynamicFormatter<TestEnum?>();
+			var buffer = DynamicFormatter.Serialize(enumVal);
+			var resultTime = DynamicFormatter.Deserialize(buffer);
+			Assert.AreEqual(enumVal, resultTime);
+		}
+
+		[TestMethod]
 		public void CrossReferenceClass()
 		{
 			var entity = new CrossReferenceClass();

@@ -9,6 +9,18 @@ namespace UnitTest.Models
 		second
 	}
 
+	public class ChashedObject<T>
+	{
+		public DateTime date;
+
+		public T Value { get; set; }
+
+		public ChashedObject()
+		{
+			date = DateTime.Now;
+		}
+	}
+
 	[Serializable]
 	internal class CrossReferenceClass
 	{

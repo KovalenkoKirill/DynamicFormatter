@@ -24,7 +24,12 @@ namespace DynamicFormatter.TypeResovers
 
 		public object Desirialize(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
-			return bitSerializer.Deserialize(buffer.CurrentBuffer, offset);
+			object result = bitSerializer.Deserialize(buffer.CurrentBuffer, offset);
+			if(typeInfo.IsEnum)
+			{
+				return Enum.ToObject(typeInfo.Type, (int)result);
+			}
+			return result;
 		}
 
 		public byte[] Serialize(object Entity, DynamicBuffer buffer, Dictionary<object, BufferPtr> referenceMaping)
