@@ -43,6 +43,10 @@ namespace UnitTest.Models
 		[Key(4)]
 		public int p5 { get; set; }
 
+		[ProtoMember(6)]
+		[Key(5)]
+		public string[] p6;
+
 		public StrongStructure()
 		{
 			p1 = false;
@@ -50,6 +54,11 @@ namespace UnitTest.Models
 			p3 = "some string in p3";
 			p4 = new c1();
 			p5 = 50;
+			p6 = new string[]
+			{
+				"first element",
+				"Second element"
+			};
 		}
 	}
 
@@ -105,7 +114,7 @@ namespace UnitTest.Models
 
 		[ProtoMember(8)]
 		[Key(6)]
-		public string p7 { get; set; }
+		string p7 { get; set; }
 
 		[ProtoMember(9)]
 		[Key(7)]

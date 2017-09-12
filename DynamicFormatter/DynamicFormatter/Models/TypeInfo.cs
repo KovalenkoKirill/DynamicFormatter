@@ -14,7 +14,12 @@ using DynamicFormatter.TypeResovers;
 
 namespace DynamicFormatter
 {
-	internal class TypeInfo
+	#if DEBUG
+	public
+#else
+	internal
+#endif
+	class TypeInfo
 	{
 		#region instanse
 
@@ -161,7 +166,7 @@ namespace DynamicFormatter
 		#region Property
 
 
-		public ITypeResolver Resolver
+		internal ITypeResolver Resolver
 		{
 			get
 			{

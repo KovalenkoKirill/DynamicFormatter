@@ -9,6 +9,15 @@ namespace UnitTest.Models
 		second
 	}
 
+	public class JustSimpleClass
+	{
+		public int firstInt = 10;
+
+		public int secondInt = 15;
+
+		public int thirdInt = 20;
+	}
+
 	public class ChashedObject<T>
 	{
 		public DateTime date;

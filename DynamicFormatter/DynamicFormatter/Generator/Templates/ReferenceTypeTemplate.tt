@@ -1,0 +1,54 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="DynamicFormatter.Extentions" #>
+<#@ import namespace="DynamicFormatter.Extentions" #>
+using DynamicFormatter.interfaces;
+using DynamicFormatter.Generator;
+using DynamicFormatter.Extentions;
+using System.Runtime.Serialization;
+
+namespace <#= this.nameSpace #>
+{
+	public class <#= this.className #> :IResolver<<#=typeInfo.Type.FullName#>>
+	{
+	<#foreach(var type in this.referenceFields)
+	  {
+		#>public IResolver<<#=type.FullName #>> _<#=type.Name#>Resolver = null;
+
+		public IResolver<<#=type.FullName #>> <#=type.Name#>Resolver
+		{
+			get
+			{
+				if(_<#=type.Name#>Resolver == null)
+				{
+					_<#=type.Name#>Resolver = TypeResolveFactory.GetResolver<<#=type.Name#>>();
+				}
+				return _<#=type.Name#>Resolver;
+			}
+		}
+		
+	<#}#>
+		
+		public <#=typeInfo.Type.FullName#> instanse(byte[] buffer, int offset)
+		{
+			var entity = (<#=typeInfo.Type.FullName#>)FormatterServices.GetSafeUninitializedObject(typeof(<#=typeInfo.Type.FullName#>));
+			offset++;
+			<#foreach(var field in this.typeInfo.Fields)
+			{
+				if(this.isPrimitive(field))
+				{#>
+					
+			entity.<#=field.Name#> = BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset);
+
+			offset += <#=this.GetSizeInBuffer(field)#>;
+
+				<#}
+			}#>
+
+			return entity;
+		}
+	}
+}
