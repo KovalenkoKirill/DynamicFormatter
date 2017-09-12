@@ -34,10 +34,29 @@ namespace DynamicFormatter.TypeResovers
 			return ptrBytes;
 		}
 
-		public new object Desirialize(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
+		public unsafe new object Desirialize(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
-			char[] array = (char[])base.Desirialize(offset, buffer, referenceMaping);
-			return new String(array);
+			fixed (byte* buf = buffer.CurrentBuffer)
+			{
+				short position = offset == 0 ? (short)0 : *(short*)(buf + offset);
+				if (position == -1)
+				{
+					return null;
+				}
+				if (referenceMaping.ContainsKey(position))
+				{
+					return referenceMaping[position];
+				}
+				int lenght = *(int*)(buf + position);
+
+				fixed (char* charP = new char[lenght])
+				{
+					int bytesForCopy = sizeof(char) * lenght;
+					byte* source = (buf + position + sizeof(int));
+					Buffer.MemoryCopy(source, charP, bytesForCopy, bytesForCopy);
+					return new String(charP);
+				}
+			}
 		}
 	}
 }
