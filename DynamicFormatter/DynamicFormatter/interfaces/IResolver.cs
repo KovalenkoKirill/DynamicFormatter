@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace DynamicFormatter.interfaces
 {
-	#if DEBUG
-	public
-#else
-	internal
-#endif
-	interface IResolver<T>
+	public interface IResolver<T>
 	{
-		T instanse(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping);
+		object instanse(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping);
 	}
 }

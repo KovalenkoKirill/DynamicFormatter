@@ -9,20 +9,28 @@ namespace UnitTest.Models
 		second
 	}
 
-	public class JustSimpleClass
+	public struct JustSimpleClass
 	{
 		public int firstInt { get; set; }
 
-		int secondInt = 15;
+		int secondInt { get; set; }
 
-		public int thirdInt = 20;
+		public int thirdInt { get; set; }
 
-		string test = "zaza";
-		public string azaza = "zazaza";
+		string test;
+		public string azaza;
 
-		public SecondSimpleClass ss = new SecondSimpleClass();
+		public SecondSimpleClass ss;
 
-		
+		public JustSimpleClass(int z)
+		{
+			firstInt = 40;
+			secondInt = 30;
+			thirdInt = 12;
+			test = "azaza";
+			ss = new SecondSimpleClass();
+			azaza = "zzaza";
+		}
 	}
 
 	public class SecondSimpleClass

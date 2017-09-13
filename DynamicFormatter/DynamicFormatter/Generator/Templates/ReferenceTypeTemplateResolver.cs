@@ -17,8 +17,8 @@ namespace DynamicFormatter.Generator.Templates
 		public string className;
 
 		public List<Type> referenceFields = new List<Type>();
-		#if DEBUG
-	public
+#if DEBUG
+		public
 #else
 	internal
 #endif
@@ -26,10 +26,10 @@ namespace DynamicFormatter.Generator.Templates
 		{
 			this.typeInfo = typeInfo;
 			this.className = typeInfo.Type.Name;
-			foreach(var fiels in typeInfo.Fields)
+			foreach (var fiels in typeInfo.Fields)
 			{
 				var fieldInfo = TypeInfo.instanse(fiels.FieldType);
-				if(!fieldInfo.IsValueType && !fieldInfo.IsHasReference)
+				if (!fieldInfo.IsValueType && !fieldInfo.IsHasReference)
 				{
 					referenceFields.Add(fieldInfo.Type);
 				}

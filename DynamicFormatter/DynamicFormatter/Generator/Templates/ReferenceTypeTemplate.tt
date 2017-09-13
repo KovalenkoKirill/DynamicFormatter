@@ -14,35 +14,13 @@
 
 			if(this.typeInfo.IsValueType)
 			{#>
-				Func<object, object, object> _Setter_<#=this.ValidateName(field)#>;
+				Func<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>, <#=typeInfo.Type.FullName#>> Setter_<#=this.ValidateName(field)#>;
 
-				public Func<object, object, object> Setter_<#=this.ValidateName(field)#>
-				{
-					get
-					{
-						if(this._Setter_<#=this.ValidateName(field)#> == null)
-						{
-							this._Setter_<#=this.ValidateName(field)#> = this.typeInfo.AccessMethods[<#=this.GetHash(field)#>].SetterForValueType;
-						}
-						return _Setter_<#=this.ValidateName(field)#>;
-					}
-				}
 			<#}
 			else
 			{#>
-				public Action<object, object> _Setter_<#=this.ValidateName(field)#>;
+				public Action<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>> Setter_<#=this.ValidateName(field)#>;
 
-				public Action<object, object> Setter_<#=this.ValidateName(field)#>
-				{
-					get
-					{
-						if(this._Setter_<#=this.ValidateName(field)#> == null)
-						{
-							this._Setter_<#=this.ValidateName(field)#> = this.typeInfo.AccessMethods[<#=this.GetHash(field)#>].Setter;
-						}
-						return _Setter_<#=this.ValidateName(field)#>;
-					}
-				}
 			<#}
 		}
 		
@@ -53,9 +31,69 @@
 		public <#= this.className #>()
 		{
 			this.typeInfo = TypeInfo.instanse(typeof(<#=typeInfo.Type.FullName#>));
+
+			<#foreach(var field in this.typeInfo.Fields)
+			{
+				if(this.isPrivate(field))
+				{
+							if(!this.typeInfo.IsValueType)
+							{#>
+								
+								{
+										ParameterExpression p1 = Expression.Parameter(typeof(<#=typeInfo.Type.FullName#>), "p1");
+										ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
+
+										var m1 = Expression.MakeMemberAccess(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+										BinaryExpression body = Expression.Assign(m1, p2);
+										var lambda = Expression.Lambda<Action<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>>>(body, p1, p2);
+										Setter_<#=this.ValidateName(field)#> = lambda.Compile();
+								}
+
+							<#}
+							else
+							{#>
+
+							{
+								ParameterExpression p1 = Expression.Parameter(typeof(<#=typeInfo.Type.FullName#>), "p1");
+								ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
+								ParameterExpression SturctObjectParam = Expression.Variable(typeof(<#=typeInfo.Type.FullName#>), "Struct");
+								ParameterExpression retObjectParam = Expression.Variable(typeof(<#=typeInfo.Type.FullName#>), "ret");
+
+								LabelTarget returnTarget = Expression.Label(typeof(<#=typeInfo.Type.FullName#>));
+
+
+								var assignToRet = Expression.Assign(SturctObjectParam, p1);
+								var makeMeberAccess = Expression.MakeMemberAccess(SturctObjectParam, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+
+								var assign = Expression.Assign(makeMeberAccess, p2);
+								var assingnToResult = Expression.Assign(
+																retObjectParam,
+																(SturctObjectParam));
+
+								GotoExpression returnExpression = Expression.Return(returnTarget,
+																				retObjectParam, typeof(<#=typeInfo.Type.FullName#>));
+
+								LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
+
+								BlockExpression block = Expression.Block(
+																		new ParameterExpression[] { SturctObjectParam, retObjectParam },
+																		assignToRet,
+																		assign,
+																		assingnToResult,
+																		returnExpression,
+																		returnLabel);
+								var lambda = Expression.Lambda<Func<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>, <#=typeInfo.Type.FullName#>>>(block, p1, p2);
+								Setter_<#=this.ValidateName(field)#> = lambda.Compile();
+							}
+
+							<#}
+					}
+			}
+			#>
+
 		}
 
-		public <#=typeInfo.Type.FullName#> instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
+		public object instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
 		{
 			byte[] buffer = buff.CurrentBuffer;
 			var entity = (<#=typeInfo.Type.FullName#>)FormatterServices.GetSafeUninitializedObject(typeof(<#=typeInfo.Type.FullName#>));
@@ -68,7 +106,7 @@
 					{#>
 						<#if(this.typeInfo.IsValueType)
 						{#>
-							entity = (<#=this.FieldFullName(field)#>)Setter_<#=this.ValidateName(field)#>.Invoke(entity,BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset));
+							entity = Setter_<#=this.ValidateName(field)#>.Invoke(entity,BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset));
 						<#}
 						else
 						{#>
@@ -87,7 +125,7 @@
 				{
 					if(this.typeInfo.IsValueType)
 					{#>
-						entity = (<#=this.FieldFullName(field)#>)Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>));
+						entity = Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>);
 					<#}
 					else
 					{#>
@@ -114,7 +152,7 @@
 
 					<#if(this.typeInfo.IsValueType)
 					{#>
-							entity = (<#=this.FieldFullName(field)#>)Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>_Result);
+							entity = Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>_Result);
 					<#}
 					else
 					{#>
@@ -130,7 +168,16 @@
 			 }#>
 			  offset += <#=this.GetSizeInBuffer(field)#>;
 			<#}#>
-			return entity;
+
+			<#if(this.typeInfo.IsValueType)
+			{
+				#>return (object)entity;<#
+			}#>
+
+			<#if(!this.typeInfo.IsValueType)
+			{
+				#>return entity;<#
+			}#>
 		}
 
 		public unsafe string DesirializeString(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)

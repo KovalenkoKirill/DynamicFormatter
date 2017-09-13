@@ -8,12 +8,18 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static DynamicFormatter.Extentions.Сonstants;
 
 namespace DynamicFormatter.Generator
 {
 	public static class TypeResolveFactory
 	{
-		private static ConcurrentDictionary<int,DynamicClassResolver> resolvers = new ConcurrentDictionary<int, DynamicClassResolver>();
+		#if DEBUG
+		public
+		#else
+		private
+		#endif
+		static ConcurrentDictionary<int,DynamicClassResolver> resolvers = new ConcurrentDictionary<int, DynamicClassResolver>();
 
 		private static HashSet<int> inTask = new HashSet<int>();
 
@@ -21,11 +27,19 @@ namespace DynamicFormatter.Generator
 
 		public static object ResolveDesirialize(Type type,int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
+			// non dynamic class logic
+			if (!GenerateClass)
+			{
+				var typeInfo = TypeInfo.instanse(type);
+				return typeInfo.Resolver.Desirialize(offset, buffer, referenceMaping);
+			}
+
 			DynamicClassResolver resolver;
 			int hash = RuntimeHelpers.GetHashCode(type);
 			if (!resolvers.TryGetValue(hash, out resolver))
 			{
 				var typeInfo = TypeInfo.instanse(type);
+					// task for generate resolver
 					if (!inTask.Contains(hash) && !started)
 					{
 					started = true;

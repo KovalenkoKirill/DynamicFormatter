@@ -19,6 +19,7 @@ namespace DynamicFormatter.Assembly
 			CompilerParameters parameters = new CompilerParameters();
 			parameters.GenerateInMemory = true;
 			parameters.ReferencedAssemblies.Add("DynamicFormatter.dll");
+			parameters.ReferencedAssemblies.Add("System.Core.dll");
 			parameters.CompilerOptions = "/unsafe";
 			var dependensyAssembly = GetDllDependency(targers);
 			foreach(var ddl in dependensyAssembly)

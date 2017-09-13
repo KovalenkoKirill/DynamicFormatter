@@ -18,7 +18,7 @@ namespace UnitTest
 	[TestClass]
 	public class ReflectionTest
 	{
-		#if DEBUG
+#if DEBUG
 		[TestMethod]
 		public void TestGetterAndSetter()
 		{
@@ -46,7 +46,7 @@ namespace UnitTest
 			}
 		}
 
-		struct TestGeneric<T,U>
+		struct TestGeneric<T, U>
 		{
 			public T key;
 			public U Val;
@@ -70,13 +70,80 @@ namespace UnitTest
 			foreach (var member in genericMembers)
 			{
 				var action = ReflectionUtils.CreateInstanceFieldSetterForValueType(member);
-				testGeneric = (TestGeneric<int,int>)action.Invoke(testGeneric, 90);
+				testGeneric = (TestGeneric<int, int>)action.Invoke(testGeneric, 90);
 			}
 
 			Assert.AreEqual(testGeneric.key, 90);
 			Assert.AreEqual(testGeneric.Val, 90);
 
 		}
-	#endif
+
+		[TestMethod]
+		public void TestSetterStrongType()
+		{
+			JustSimpleClass simple = new JustSimpleClass(10);
+			var genericMembers = simple.GetType().GetMembers(
+BindingFlags.NonPublic |
+BindingFlags.Public |
+BindingFlags.Instance)
+.Where(x => x.MemberType == MemberTypes.Field)
+.Cast<FieldInfo>().ToList();
+			foreach (var member in genericMembers)
+			{
+				if (member.FieldType == typeof(int))
+				{
+					var action = CreateInstanceFieldSetterForValueType(member);
+					var result = action.Invoke(simple, 90);
+				}
+			}
+		}
+				
+
+		public static Action<JustSimpleClass, int> CreateInstanceFieldSetter(FieldInfo member)
+		{
+			ParameterExpression p1 = Expression.Parameter(typeof(JustSimpleClass), "p1");
+			ParameterExpression p2 = Expression.Parameter(typeof(int), "p2");
+
+			var m1 = Expression.MakeMemberAccess(p1, member);
+			BinaryExpression body = Expression.Assign(m1, p2);
+			var lambda = Expression.Lambda<Action<JustSimpleClass, int>>(body, p1, p2);
+			return lambda.Compile();
+		}
+		public static Func<JustSimpleClass, int, JustSimpleClass> CreateInstanceFieldSetterForValueType(FieldInfo member)
+		{
+
+			ParameterExpression p1 = Expression.Parameter(typeof(JustSimpleClass), "p1");
+			ParameterExpression p2 = Expression.Parameter(typeof(int), "p2");
+			ParameterExpression SturctObjectParam = Expression.Variable(member.DeclaringType, "Struct");
+			ParameterExpression retObjectParam = Expression.Variable(typeof(JustSimpleClass), "ret");
+
+			LabelTarget returnTarget = Expression.Label(typeof(JustSimpleClass));
+
+
+			var assignToRet = Expression.Assign(SturctObjectParam, p1);
+			var makeMeberAccess = Expression.MakeMemberAccess(SturctObjectParam, member);
+
+			var assign = Expression.Assign(makeMeberAccess, p2);
+			var assingnToResult = Expression.Assign(
+											retObjectParam,
+											(SturctObjectParam));
+
+			GotoExpression returnExpression = Expression.Return(returnTarget,
+															retObjectParam, typeof(JustSimpleClass));
+
+			LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
+
+			BlockExpression block = Expression.Block(
+													new ParameterExpression[] { SturctObjectParam, retObjectParam },
+													assignToRet,
+													assign,
+													assingnToResult,
+													returnExpression,
+													returnLabel);
+			var lambda = Expression.Lambda<Func<JustSimpleClass, int, JustSimpleClass>>(block, p1, p2);
+			return lambda.Compile();
+		}
+
+#endif
 	}
 }

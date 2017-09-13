@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace DynamicFormatter.Extentions
 {
-	internal static class Сonstants
+#if DEBUG
+	public
+#else
+	internal
+#endif
+	static class Сonstants
 	{
 		public const string Dynamic_Assembly_Name = "DynamicFormatter.Dynamic";
 
@@ -14,5 +19,6 @@ namespace DynamicFormatter.Extentions
 
 		public static readonly byte[] nullPtrBytres = BitConverter.GetBytes(((short)-1));
 
+		public static bool GenerateClass = true;
 	}
 }
