@@ -14,12 +14,7 @@ using DynamicFormatter.TypeResovers;
 
 namespace DynamicFormatter
 {
-	#if DEBUG
-	public
-#else
-	internal
-#endif
-	class TypeInfo
+	public class TypeInfo
 	{
 		#region instanse
 
@@ -60,7 +55,15 @@ namespace DynamicFormatter
 
 		#region members
 
-		private Dictionary<int, GetterAndSetter> _accessMethods;
+		internal Dictionary<int, GetterAndSetter> _accessMethods;
+
+		public Dictionary<int, GetterAndSetter> AccessMethods
+		{
+			get
+			{
+				return _accessMethods;
+			}
+		}
 
 		private Type _type;
 
@@ -327,6 +330,14 @@ namespace DynamicFormatter
 			}
 		}
 
+		public bool IsStrongType
+		{
+			get
+			{
+				return !IsValueType && IsHasReference;
+			}
+		}
+
 		public int SizeInBuffer
 		{
 			get
@@ -382,6 +393,49 @@ namespace DynamicFormatter
 				}
 			}
 			return false;
+		}
+
+		internal List<Type> GetChild(List<Type> current = null)
+		{
+			if(current == null)
+			{
+				current = new List<Type>();
+			}
+			var members = Fields;
+			foreach (var member in members)
+			{
+				Type memberType = member.FieldType;
+
+				if (memberType != null)
+				{
+					var typeInfo = instanse(memberType);
+					if (typeInfo.IsPrimitive  
+						|| typeInfo.Type == typeof(string) 
+						|| typeInfo.isNullable
+						|| typeInfo.IsArray)
+						continue;
+					if (!memberType.IsValueType || memberType.IsGenericType)
+					{
+						if(!current.Contains(memberType))
+						{
+							current.Add(memberType);
+						}
+						typeInfo.GetChild(current);
+					}
+					else
+					{
+						if (typeInfo.IsHasReference)
+						{
+							if (!current.Contains(memberType))
+							{
+								current.Add(memberType);
+							}
+							typeInfo.GetChild(current);
+						}
+					}
+				}
+			}
+			return current;
 		}
 
 		#region FieldAccess

@@ -43,15 +43,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assembly\CompileService.cs" />
-    <Compile Include="Assembly\DynamicAssembly.cs" />
     <Compile Include="enums\NullableBool.cs" />
     <Compile Include="enums\ObjectFlags.cs" />
-    <Compile Include="enums\StartupBehavior.cs" />
     <Compile Include="Extentions\BaseConvertor.cs" />
     <Compile Include="Extentions\BaseTypeSizeHelper.cs" />
     <Compile Include="Extentions\ReflectionUtils.cs" />
     <Compile Include="Extentions\TypeFinder.cs" />
     <Compile Include="Extentions\Сonstants.cs" />
+    <Compile Include="Generator\Templates\BaseModuleTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BaseModuleTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Generator\Templates\BaseModuleTemplatePartical.cs" />
     <Compile Include="Generator\TypeResolveFactory.cs" />
     <Compile Include="interfaces\IResolver.cs" />
     <Compile Include="interfaces\ITypeResolver.cs" />
@@ -84,6 +88,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Generator\Templates\BaseModuleTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>BaseModuleTemplate.cs</LastGenOutput>
+    </Content>
     <Content Include="Generator\Templates\ReferenceTypeTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ReferenceTypeTemplate.cs</LastGenOutput>
@@ -93,10 +101,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

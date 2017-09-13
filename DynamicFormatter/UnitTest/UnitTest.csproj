@@ -69,6 +69,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
     <Compile Include="DynamicClassesGenerator.cs" />
     <Compile Include="Helpers\ProtoBufHelper.cs" />
     <Compile Include="Models\IStrongStructure.cs" />

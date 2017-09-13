@@ -2,7 +2,8 @@
 
 namespace DynamicFormatter.Models
 {
-	internal class DynamicBuffer
+
+	public class DynamicBuffer
 	{
 		private byte[] bytes;
 

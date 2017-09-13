@@ -379,6 +379,7 @@ namespace DynamicFormatter.Serializers
 			{
 				Deserialize = (buffer, offset) =>
 				{
+					
 					object str = Activator.CreateInstance(type);
 
 					int size = Marshal.SizeOf(type);

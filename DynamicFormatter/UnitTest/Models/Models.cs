@@ -11,11 +11,24 @@ namespace UnitTest.Models
 
 	public class JustSimpleClass
 	{
-		public int firstInt = 10;
+		public int firstInt { get; set; }
 
-		public int secondInt = 15;
+		int secondInt = 15;
 
 		public int thirdInt = 20;
+
+		string test = "zaza";
+		public string azaza = "zazaza";
+
+		public SecondSimpleClass ss = new SecondSimpleClass();
+
+		
+	}
+
+	public class SecondSimpleClass
+	{
+		int z = 50;
+		int d = 213;
 	}
 
 	public class ChashedObject<T>

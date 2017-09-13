@@ -5,50 +5,156 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="DynamicFormatter.Extentions" #>
 <#@ import namespace="DynamicFormatter.Extentions" #>
-using DynamicFormatter.interfaces;
-using DynamicFormatter.Generator;
-using DynamicFormatter.Extentions;
-using System.Runtime.Serialization;
-
-namespace <#= this.nameSpace #>
-{
 	public class <#= this.className #> :IResolver<<#=typeInfo.Type.FullName#>>
 	{
-	<#foreach(var type in this.referenceFields)
+	<#foreach(var field in this.typeInfo.Fields)
 	  {
-		#>public IResolver<<#=type.FullName #>> _<#=type.Name#>Resolver = null;
-
-		public IResolver<<#=type.FullName #>> <#=type.Name#>Resolver
+		if(this.isPrivate(field))
 		{
-			get
-			{
-				if(_<#=type.Name#>Resolver == null)
+
+			if(this.typeInfo.IsValueType)
+			{#>
+				Func<object, object, object> _Setter_<#=this.ValidateName(field)#>;
+
+				public Func<object, object, object> Setter_<#=this.ValidateName(field)#>
 				{
-					_<#=type.Name#>Resolver = TypeResolveFactory.GetResolver<<#=type.Name#>>();
+					get
+					{
+						if(this._Setter_<#=this.ValidateName(field)#> == null)
+						{
+							this._Setter_<#=this.ValidateName(field)#> = this.typeInfo.AccessMethods[<#=this.GetHash(field)#>].SetterForValueType;
+						}
+						return _Setter_<#=this.ValidateName(field)#>;
+					}
 				}
-				return _<#=type.Name#>Resolver;
-			}
+			<#}
+			else
+			{#>
+				public Action<object, object> _Setter_<#=this.ValidateName(field)#>;
+
+				public Action<object, object> Setter_<#=this.ValidateName(field)#>
+				{
+					get
+					{
+						if(this._Setter_<#=this.ValidateName(field)#> == null)
+						{
+							this._Setter_<#=this.ValidateName(field)#> = this.typeInfo.AccessMethods[<#=this.GetHash(field)#>].Setter;
+						}
+						return _Setter_<#=this.ValidateName(field)#>;
+					}
+				}
+			<#}
 		}
 		
-	<#}#>
+	 }#>
 		
-		public <#=typeInfo.Type.FullName#> instanse(byte[] buffer, int offset)
+		TypeInfo typeInfo;
+
+		public <#= this.className #>()
 		{
+			this.typeInfo = TypeInfo.instanse(typeof(<#=typeInfo.Type.FullName#>));
+		}
+
+		public <#=typeInfo.Type.FullName#> instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
+		{
+			byte[] buffer = buff.CurrentBuffer;
 			var entity = (<#=typeInfo.Type.FullName#>)FormatterServices.GetSafeUninitializedObject(typeof(<#=typeInfo.Type.FullName#>));
 			offset++;
 			<#foreach(var field in this.typeInfo.Fields)
 			{
 				if(this.isPrimitive(field))
+				{
+					if(this.isPrivate(field))
+					{#>
+						<#if(this.typeInfo.IsValueType)
+						{#>
+							entity = (<#=this.FieldFullName(field)#>)Setter_<#=this.ValidateName(field)#>.Invoke(entity,BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset));
+						<#}
+						else
+						{#>
+							Setter_<#=this.ValidateName(field)#>.Invoke(entity,BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset));
+						<#}
+					}
+					else
+					{#>
+							entity.<#=this.ValidateName(field)#> = BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset);
+					<#}
+					}
+			  else if(field.FieldType == typeof(string))
+			  {#>
+				string <#=this.ValidateName(field)#> = DesirializeString(offset,buff,referenceMaping);
+				<#if(this.isPrivate(field))
+				{
+					if(this.typeInfo.IsValueType)
+					{#>
+						entity = (<#=this.FieldFullName(field)#>)Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>));
+					<#}
+					else
+					{#>
+						Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>);
+					<#}
+				}
+				else
 				{#>
-					
-			entity.<#=field.Name#> = BaseConvertor.Get<#=this.GetTypePrefix(field)#>(buffer, offset);
-
-			offset += <#=this.GetSizeInBuffer(field)#>;
-
+					entity.<#=this.ValidateName(field)#>  = <#=this.ValidateName(field)#>;
 				<#}
-			}#>
+			 }
+			 else
+			 {#>
+				short ptrFor<#=this.ValidateName(field)#> = BaseConvertor.GetShort(buffer,offset);
 
+				<#=this.FieldFullName(field)#> <#=this.ValidateName(field)#>_Result =(<#=this.FieldFullName(field)#>) TypeResolveFactory.ResolveDesirialize(
+																		typeof(<#=this.FieldFullName(field)#>),
+																		ptrFor<#=this.ValidateName(field)#>,
+																		buff,
+																		referenceMaping);
+
+				<#if(this.isPrivate(field))
+				{#>
+
+					<#if(this.typeInfo.IsValueType)
+					{#>
+							entity = (<#=this.FieldFullName(field)#>)Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>_Result);
+					<#}
+					else
+					{#>
+							Setter_<#=this.ValidateName(field)#>.Invoke(entity,<#=this.ValidateName(field)#>_Result);
+					<#}
+
+				}
+				else
+				{#>
+					entity.<#=this.ValidateName(field)#>  = <#=this.ValidateName(field)#>_Result;
+				<#}
+
+			 }#>
+			  offset += <#=this.GetSizeInBuffer(field)#>;
+			<#}#>
 			return entity;
 		}
+
+		public unsafe string DesirializeString(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
+		{
+			fixed (byte* buf = buffer.CurrentBuffer)
+			{
+				short position = offset == 0 ? (short)0 : *(short*)(buf + offset);
+				if (position == -1)
+				{
+					return null;
+				}
+				if (referenceMaping.ContainsKey(position))
+				{
+					return referenceMaping[position] as string;
+				}
+				int lenght = *(int*)(buf + position);
+
+				fixed (char* charP = new char[lenght])
+				{
+					int bytesForCopy = sizeof(char) * lenght;
+					byte* source = (buf + position + sizeof(int));
+					Buffer.MemoryCopy(source, charP, bytesForCopy, bytesForCopy);
+					return new String(charP);
+				}
+			}
+		}
 	}
-}

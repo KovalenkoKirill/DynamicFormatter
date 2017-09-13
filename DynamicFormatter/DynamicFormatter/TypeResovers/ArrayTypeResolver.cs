@@ -8,6 +8,7 @@ using DynamicFormatter.Models;
 using DynamicFormatter.Extentions;
 using static System.Buffer;
 using DynamicFormatter.enums;
+using DynamicFormatter.Generator;
 
 namespace DynamicFormatter.TypeResovers
 {
@@ -45,7 +46,7 @@ namespace DynamicFormatter.TypeResovers
 
 			for(int i = 0; i<arrayLenght ;i++)
 			{
-				object innerObject = memberTypeInfo.Resolver.Desirialize(position + padding, buffer, referenceMaping);
+				object innerObject = TypeResolveFactory.ResolveDesirialize(memberTypeInfo.Type,position + padding, buffer, referenceMaping);
 				array.SetValue(innerObject, i);
 				padding += memberTypeInfo.SizeInBuffer;
 			}

@@ -1,4 +1,5 @@
-﻿using DynamicFormatter.Models;
+﻿using DynamicFormatter.Generator;
+using DynamicFormatter.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +60,11 @@ namespace DynamicFormatter.Serializers
 			}
 			var referenceMaping = new Dictionary<int, object>();
 			var dynamicBuffer = new DynamicBuffer(buffer);
-			return _typeInfo.Resolver.Desirialize(0, dynamicBuffer, referenceMaping);
+			
+			return TypeResolveFactory.ResolveDesirialize(_typeInfo.Type,
+												 0,
+												 dynamicBuffer,
+												 referenceMaping);
 		}
 
 		public byte[] Serialize(object entity)

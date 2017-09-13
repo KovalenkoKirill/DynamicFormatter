@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DynamicFormatter.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,6 @@ namespace DynamicFormatter.interfaces
 #endif
 	interface IResolver<T>
 	{
-		T instanse(byte[] buffer, int offset);
+		T instanse(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping);
 	}
 }

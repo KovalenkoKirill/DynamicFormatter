@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DynamicFormatter.Models;
 using System.Runtime.Serialization;
 using DynamicFormatter.enums;
+using DynamicFormatter.Generator;
 
 namespace DynamicFormatter.TypeResovers
 {
@@ -39,7 +40,7 @@ namespace DynamicFormatter.TypeResovers
 
 			if(isHasValue)
 			{
-				return memberTypeInfo.Resolver.Desirialize(position + positionInBuffer, buffer, referenceMaping);
+				return TypeResolveFactory.ResolveDesirialize(memberTypeInfo.Type,position + positionInBuffer, buffer, referenceMaping);
 			}
 			return null;
 

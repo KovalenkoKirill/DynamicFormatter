@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,8 +13,6 @@ namespace DynamicFormatter.Generator.Templates
 	public partial class ReferenceTypeTemplate : ReferenceTypeTemplateBase
 	{
 		public TypeInfo typeInfo;
-
-		public string nameSpace;
 
 		public string className;
 
@@ -26,7 +25,6 @@ namespace DynamicFormatter.Generator.Templates
 		ReferenceTypeTemplate(TypeInfo typeInfo)
 		{
 			this.typeInfo = typeInfo;
-			this.nameSpace = Сonstants.Dynamic_Assembly_Name;
 			this.className = typeInfo.Type.Name;
 			foreach(var fiels in typeInfo.Fields)
 			{
@@ -43,6 +41,39 @@ namespace DynamicFormatter.Generator.Templates
 			var typeInfo = TypeInfo.instanse(field.FieldType);
 			return typeInfo.IsPrimitive;
 		}
+
+		public bool isPrivate(FieldInfo field)
+		{
+			return field.Attributes == FieldAttributes.Private;
+		}
+
+		public int GetHash(FieldInfo field)
+		{
+			return RuntimeHelpers.GetHashCode(field);
+		}
+
+		/// <summary>
+		/// Validate for property
+		/// </summary>
+		/// <param name="field"></param>
+		/// <returns></returns>
+		private string ValidateName(FieldInfo field)
+		{
+			return field.Name.Replace("<", "").Replace(">", "");
+		}
+
+
+		private string FieldFullName(FieldInfo field)
+		{
+			var typeInfo = TypeInfo.instanse(field.FieldType);
+			if (typeInfo.isNullable)
+			{
+				var memberType = typeInfo.Type.GenericTypeArguments[0];
+				return $"{memberType.FullName}?";
+			}
+			return field.FieldType.FullName;
+		}
+
 		private string GetTypePrefix(FieldInfo field)
 		{
 			var type = field.FieldType;

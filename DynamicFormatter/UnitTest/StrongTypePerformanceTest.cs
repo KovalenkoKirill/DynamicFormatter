@@ -34,7 +34,7 @@ namespace UnitTest
 
 			var watch = Stopwatch.StartNew();
 
-			for (int i = 0; i < 50; i++)
+			for (int i = 0; i < 100000; i++)
 			{
 				var buffer = serializer.Serialize(entity);
 				var result = serializer.Deserialize(buffer);

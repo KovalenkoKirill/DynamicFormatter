@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using static System.Buffer;
 using static DynamicFormatter.Models.DynamicBuffer;
 using DynamicFormatter.enums;
+using DynamicFormatter.Generator;
 
 namespace DynamicFormatter.TypeResovers
 {
@@ -50,7 +51,7 @@ namespace DynamicFormatter.TypeResovers
 			foreach (var member in typeInfo.Fields)
 			{
 				var memberTypeInfo = TypeInfo.instanse(member.FieldType);
-				object innerObject = memberTypeInfo.Resolver.Desirialize(position, buffer, referenceMaping);
+				object innerObject = TypeResolveFactory.ResolveDesirialize(member.FieldType, position, buffer, referenceMaping);
 				entity = typeInfo.SetValue(entity, innerObject, member);
 				position += (short)memberTypeInfo.SizeInBuffer;
 			}

@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using static System.Buffer;
 using static DynamicFormatter.Models.DynamicBuffer;
 using DynamicFormatter.enums;
+using DynamicFormatter.Generator;
 
 namespace DynamicFormatter.TypeResovers
 {
@@ -57,7 +58,7 @@ namespace DynamicFormatter.TypeResovers
 
 			#endregion
 
-			return typeInfo.Resolver.Desirialize(position, buffer, referenceMaping);
+			return TypeResolveFactory.ResolveDesirialize(currentType, position, buffer, referenceMaping);
 		}
 
 		public byte[] Serialize(object Entity, DynamicBuffer buffer, Dictionary<object, BufferPtr> referenceMaping)
