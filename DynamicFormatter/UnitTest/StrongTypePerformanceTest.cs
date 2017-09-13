@@ -1,4 +1,5 @@
 ﻿using DynamicFormatter;
+using DynamicFormatter.Extentions;
 using DynamicFormatter.Serializers;
 using MessagePack;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnitTest.Helpers;
 using UnitTest.Models;
@@ -32,16 +34,15 @@ namespace UnitTest
 
 			var serializer = new DynamicFormatter<StrongStructure>();
 
-			var watch = Stopwatch.StartNew();
+			Сonstants.GenerateClass = true;
 
-			for (int i = 0; i < 100000; i++)
-			{
-				var buffer = serializer.Serialize(entity);
-				var result = serializer.Deserialize(buffer);
-			}
-			watch.Stop();
+			var buffer = serializer.Serialize(entity);
 
-			long ms = watch.ElapsedMilliseconds;
+			var desResilt = serializer.Deserialize(buffer);
+
+			Thread.Sleep(1500);
+
+			desResilt = serializer.Deserialize(buffer);
 		}
 
 #else

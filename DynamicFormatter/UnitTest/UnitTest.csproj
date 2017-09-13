@@ -69,7 +69,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Content Include="GenerateExample.cs" />
+    <Compile Include="GenerateExample.cs" />
     <Compile Include="DynamicClassesGenerator.cs" />
     <Compile Include="Helpers\ProtoBufHelper.cs" />
     <Compile Include="Models\IStrongStructure.cs" />

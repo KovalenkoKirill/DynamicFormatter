@@ -93,6 +93,8 @@ namespace DynamicFormatter
 
 		private int? _sizeInBuffer;
 
+		private bool? _isCanGenerate;
+
 		#endregion members
 
 		#region constructor
@@ -174,6 +176,29 @@ namespace DynamicFormatter
 			get
 			{
 				return _resolver;
+			}
+		}
+
+		internal bool IsCanGenerate
+		{
+			get
+			{
+				if (_isCanGenerate == null)
+				{
+					if (IsPrimitive
+					 || Type == typeof(string)
+					 || isNullable
+					 || IsArray)
+					{
+						_isCanGenerate = false;
+					}
+					if (IsValueType && !IsHasReference)
+					{
+						_isCanGenerate = false;
+					}
+					_isCanGenerate = true;
+				}
+				return _isCanGenerate.Value;
 			}
 		}
 

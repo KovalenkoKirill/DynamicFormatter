@@ -314,25 +314,39 @@ foreach(var field in this.typeInfo.Fields)
             
             #line default
             #line hidden
-            this.Write("\r\n\t\t}\r\n\r\n\t\tpublic object instanse(int offset, DynamicBuffer buff, Dictionary<int," +
-                    " object> referenceMaping)\r\n\t\t{\r\n\t\t\tbyte[] buffer = buff.CurrentBuffer;\r\n\t\t\tvar e" +
-                    "ntity = (");
+            this.Write(@"
+		}
+
+		public object instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
+		{
+			byte[] buffer = buff.CurrentBuffer;
+
+			short position = (short)offset == 0 ?
+				 (short)0 : BaseConvertor.GetShort(buffer, offset);
+
+			if (position == -1)
+			{
+				return null;
+			}
+			offset = position;
+
+			var entity = (");
             
-            #line 99 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 109 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(typeInfo.Type.FullName));
             
             #line default
             #line hidden
             this.Write(")FormatterServices.GetSafeUninitializedObject(typeof(");
             
-            #line 99 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 109 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(typeInfo.Type.FullName));
             
             #line default
             #line hidden
             this.Write("));\r\n\t\t\toffset++;\r\n\t\t\t");
             
-            #line 101 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 111 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 foreach(var field in this.typeInfo.Fields)
 			{
 				if(this.isPrimitive(field))
@@ -344,7 +358,7 @@ foreach(var field in this.typeInfo.Fields)
             #line hidden
             this.Write("\t\t\t\t\t\t");
             
-            #line 107 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 117 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 if(this.typeInfo.IsValueType)
 						{
             
@@ -352,21 +366,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\t\t\t\tentity = Setter_");
             
-            #line 109 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 119 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(".Invoke(entity,BaseConvertor.Get");
             
-            #line 109 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 119 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.GetTypePrefix(field)));
             
             #line default
             #line hidden
             this.Write("(buffer, offset));\r\n\t\t\t\t\t\t");
             
-            #line 110 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 120 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 						else
 						{
@@ -375,21 +389,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\t\t\t\tSetter_");
             
-            #line 113 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 123 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(".Invoke(entity,BaseConvertor.Get");
             
-            #line 113 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 123 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.GetTypePrefix(field)));
             
             #line default
             #line hidden
             this.Write("(buffer, offset));\r\n\t\t\t\t\t\t");
             
-            #line 114 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 124 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 					}
 					else
@@ -399,21 +413,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\t\t\t\tentity.");
             
-            #line 118 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 128 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(" = BaseConvertor.Get");
             
-            #line 118 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 128 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.GetTypePrefix(field)));
             
             #line default
             #line hidden
             this.Write("(buffer, offset);\r\n\t\t\t\t\t");
             
-            #line 119 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 129 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 					}
 			  else if(field.FieldType == typeof(string))
@@ -423,14 +437,14 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\tstring ");
             
-            #line 123 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 133 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(" = DesirializeString(offset,buff,referenceMaping);\r\n\t\t\t\t");
             
-            #line 124 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 134 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 if(this.isPrivate(field))
 				{
 					if(this.typeInfo.IsValueType)
@@ -440,21 +454,21 @@ if(this.isPrivate(field))
             #line hidden
             this.Write("\t\t\t\t\t\tentity = Setter_");
             
-            #line 128 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 138 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(".Invoke(entity,");
             
-            #line 128 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 138 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(");\r\n\t\t\t\t\t");
             
-            #line 129 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 139 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 					else
 					{
@@ -463,21 +477,21 @@ if(this.isPrivate(field))
             #line hidden
             this.Write("\t\t\t\t\t\tSetter_");
             
-            #line 132 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 142 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(".Invoke(entity,");
             
-            #line 132 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 142 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(");\r\n\t\t\t\t\t");
             
-            #line 133 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 143 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 				}
 				else
@@ -487,21 +501,21 @@ if(this.isPrivate(field))
             #line hidden
             this.Write("\t\t\t\t\tentity.");
             
-            #line 137 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 147 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write("  = ");
             
-            #line 137 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 147 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(";\r\n\t\t\t\t");
             
-            #line 138 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 148 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 			 }
 			 else
@@ -509,51 +523,38 @@ if(this.isPrivate(field))
             
             #line default
             #line hidden
-            this.Write("\t\t\t\tshort ptrFor");
+            this.Write("\t\t\t\t\r\n\t\t\t\t\t");
             
-            #line 142 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
-            
-            #line default
-            #line hidden
-            this.Write(" = BaseConvertor.GetShort(buffer,offset);\r\n\r\n\t\t\t\t");
-            
-            #line 144 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 153 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.FieldFullName(field)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 144 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 153 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write("_Result =(");
             
-            #line 144 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 153 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.FieldFullName(field)));
             
             #line default
             #line hidden
             this.Write(") TypeResolveFactory.ResolveDesirialize(\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\ttypeof(");
             
-            #line 145 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 154 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.FieldFullName(field)));
             
             #line default
             #line hidden
-            this.Write("),\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tptrFor");
+            this.Write("),\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\toffset,\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tbuff,\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\treferen" +
+                    "ceMaping);\r\n\r\n\t\t\t\t");
             
-            #line 146 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
-            
-            #line default
-            #line hidden
-            this.Write(",\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tbuff,\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\treferenceMaping);\r\n\r\n\t\t\t\t");
-            
-            #line 150 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 159 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 if(this.isPrivate(field))
 				{
             
@@ -561,7 +562,7 @@ if(this.isPrivate(field))
             #line hidden
             this.Write("\r\n\t\t\t\t\t");
             
-            #line 153 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 162 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 if(this.typeInfo.IsValueType)
 					{
             
@@ -569,21 +570,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\t\t\t\tentity = Setter_");
             
-            #line 155 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 164 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(".Invoke(entity,");
             
-            #line 155 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 164 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write("_Result);\r\n\t\t\t\t\t");
             
-            #line 156 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 165 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 					else
 					{
@@ -592,21 +593,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\t\t\t\tSetter_");
             
-            #line 159 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 168 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write(".Invoke(entity,");
             
-            #line 159 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 168 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write("_Result);\r\n\t\t\t\t\t");
             
-            #line 160 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 169 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 
 				}
@@ -617,21 +618,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t\t\tentity.");
             
-            #line 165 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 174 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write("  = ");
             
-            #line 165 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 174 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.ValidateName(field)));
             
             #line default
             #line hidden
             this.Write("_Result;\r\n\t\t\t\t");
             
-            #line 166 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 175 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
 
 			 }
@@ -640,21 +641,21 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\t\t\t  offset += ");
             
-            #line 169 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 178 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this.GetSizeInBuffer(field)));
             
             #line default
             #line hidden
             this.Write(";\r\n\t\t\t");
             
-            #line 170 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 179 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 }
             
             #line default
             #line hidden
             this.Write("\r\n\t\t\t");
             
-            #line 172 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 181 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 if(this.typeInfo.IsValueType)
 			{
 				
@@ -663,7 +664,7 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("return (object)entity;");
             
-            #line 174 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 183 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 
 			}
             
@@ -671,7 +672,7 @@ if(this.typeInfo.IsValueType)
             #line hidden
             this.Write("\r\n\t\t\t");
             
-            #line 177 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 186 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 if(!this.typeInfo.IsValueType)
 			{
 				
@@ -680,7 +681,7 @@ if(!this.typeInfo.IsValueType)
             #line hidden
             this.Write("return entity;");
             
-            #line 179 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
+            #line 188 "C:\Users\kkovalenko\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ReferenceTypeTemplate.tt"
 
 			}
             

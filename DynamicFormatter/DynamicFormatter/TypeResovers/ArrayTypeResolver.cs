@@ -27,7 +27,7 @@ namespace DynamicFormatter.TypeResovers
 		public object Desirialize(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
 			short position = (short)offset == 0 ?
-				 (short)0 : BitConverter.ToInt16(buffer.CurrentBuffer, offset);
+				 (short)0 : BaseConvertor.GetShort(buffer.CurrentBuffer, offset);
 
 			if (position == -1)
 			{

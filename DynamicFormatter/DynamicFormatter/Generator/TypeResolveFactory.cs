@@ -40,7 +40,7 @@ namespace DynamicFormatter.Generator
 			{
 				var typeInfo = TypeInfo.instanse(type);
 					// task for generate resolver
-					if (!inTask.Contains(hash) && !started)
+					if (typeInfo.IsCanGenerate && !inTask.Contains(hash) && !started)
 					{
 					started = true;
 						Task.Factory.StartNew(() => {

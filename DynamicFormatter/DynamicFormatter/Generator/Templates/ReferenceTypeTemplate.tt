@@ -96,6 +96,16 @@
 		public object instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
 		{
 			byte[] buffer = buff.CurrentBuffer;
+
+			short position = (short)offset == 0 ?
+				 (short)0 : BaseConvertor.GetShort(buffer, offset);
+
+			if (position == -1)
+			{
+				return null;
+			}
+			offset = position;
+
 			var entity = (<#=typeInfo.Type.FullName#>)FormatterServices.GetSafeUninitializedObject(typeof(<#=typeInfo.Type.FullName#>));
 			offset++;
 			<#foreach(var field in this.typeInfo.Fields)
@@ -139,11 +149,10 @@
 			 }
 			 else
 			 {#>
-				short ptrFor<#=this.ValidateName(field)#> = BaseConvertor.GetShort(buffer,offset);
-
-				<#=this.FieldFullName(field)#> <#=this.ValidateName(field)#>_Result =(<#=this.FieldFullName(field)#>) TypeResolveFactory.ResolveDesirialize(
+				
+					<#=this.FieldFullName(field)#> <#=this.ValidateName(field)#>_Result =(<#=this.FieldFullName(field)#>) TypeResolveFactory.ResolveDesirialize(
 																		typeof(<#=this.FieldFullName(field)#>),
-																		ptrFor<#=this.ValidateName(field)#>,
+																		offset,
 																		buff,
 																		referenceMaping);
 

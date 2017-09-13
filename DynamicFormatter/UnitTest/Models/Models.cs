@@ -35,6 +35,7 @@ namespace UnitTest.Models
 
 	public class SecondSimpleClass
 	{
+		Guid guid = Guid.NewGuid();
 		int z = 50;
 		int d = 213;
 	}

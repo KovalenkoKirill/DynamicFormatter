@@ -47,6 +47,16 @@ namespace DynamicFormatter.Generator.Templates
 			return field.Attributes == FieldAttributes.Private;
 		}
 
+		public bool InStackMemeber(FieldInfo field)
+		{
+			var typeInfo = TypeInfo.instanse(field.FieldType);
+			if(typeInfo.IsValueType && !typeInfo.IsHasReference)
+			{
+				return true;
+			}
+			return false;
+		}
+
 		public int GetHash(FieldInfo field)
 		{
 			return RuntimeHelpers.GetHashCode(field);
