@@ -34,6 +34,46 @@ namespace UnitTest
 			}).ToList();
 
 			Assert.IsTrue(result.Any());
+
+		}
+
+		[TestMethod]
+		public unsafe void ConverterTest()
+		{
+			byte[] buffer = new byte[4];
+			int someInt = 20;
+			BaseConvertor.Write32(buffer, 0, (byte*)&someInt);
+			int result = BitConverter.ToInt32(buffer, 0);
+			Assert.AreEqual(someInt, result);
+
+			buffer = new byte[128];
+			decimal someDecimal = 503.331M;
+			BaseConvertor.Write128(buffer, 0, (byte*)&someDecimal);
+			decimal resultDecimal = ToDecimal(buffer);
+			//Assert.AreEqual(someDecimal, resultDecimal);
+
+			buffer = new byte[8];
+			double somedouble = 503.331;
+			BaseConvertor.Write64(buffer, 0, (byte*)&somedouble);
+			double resultdouble = BitConverter.ToDouble(buffer, 0);
+			Assert.AreEqual(somedouble, resultdouble);
+
+			char someChar = 'y';
+			buffer = new byte[8];
+			BaseConvertor.Write16(buffer, 0, (byte*)&someChar);
+			char resultChar = BitConverter.ToChar(buffer, 0);
+			Assert.AreEqual(someChar, resultChar);
+		}
+
+		public static decimal ToDecimal(byte[] bytes)
+		{
+			int[] bits = new int[4];
+			bits[0] = ((bytes[0] | (bytes[1] << 8)) | (bytes[2] << 0x10)) | (bytes[3] << 0x18); //lo
+			bits[1] = ((bytes[4] | (bytes[5] << 8)) | (bytes[6] << 0x10)) | (bytes[7] << 0x18); //mid
+			bits[2] = ((bytes[8] | (bytes[9] << 8)) | (bytes[10] << 0x10)) | (bytes[11] << 0x18); //hi
+			bits[3] = ((bytes[12] | (bytes[13] << 8)) | (bytes[14] << 0x10)) | (bytes[15] << 0x18); //flags
+
+			return new decimal(bits);
 		}
 
 		[TestMethod]
@@ -60,9 +100,9 @@ namespace UnitTest
 		[TestMethod]
 		public void TypeResolveFactoryPerformance()
 		{
-			DynamicFormatter<JustSimpleClass> formatter = new DynamicFormatter<JustSimpleClass>();
+			DynamicFormatter<StrongStructure> formatter = new DynamicFormatter<StrongStructure>();
 
-			var entity = new JustSimpleClass(10);
+			var entity = new StrongStructure();
 
 			byte[] serializeResult = formatter.Serialize(entity);
 
@@ -97,7 +137,6 @@ namespace UnitTest
 
 			TestContext.WriteLine(message);
 		}
-
 #endif
 	}
 }

@@ -42,7 +42,10 @@ namespace UnitTest
 
 			Thread.Sleep(1500);
 
-			desResilt = serializer.Deserialize(buffer);
+			for (int i = 0; i < 10000; i++)
+			{
+				desResilt = serializer.Deserialize(buffer);
+			}
 		}
 
 #else
@@ -53,6 +56,12 @@ namespace UnitTest
 			IStrongStructure entity = new StrongStructure();
 
 			StrongTypeFormatter serializer = new StrongTypeFormatter();
+
+			{
+				var buffer = serializer.Serialize(entity);
+				serializer.Deserialize(buffer);
+			}
+			Thread.Sleep(1500);
 
 			var watch = Stopwatch.StartNew();
 
@@ -91,6 +100,13 @@ namespace UnitTest
 
 			StrongTypeFormatter serializer = new StrongTypeFormatter();
 
+			{
+				var buffer = serializer.Serialize(entity);
+				serializer.Deserialize(buffer);
+			}
+
+			Thread.Sleep(1500);
+
 			var watch = Stopwatch.StartNew();
 
 			for (int i = 0; i < 1000; i++)
@@ -123,28 +139,33 @@ namespace UnitTest
 
 			var serializer = new DynamicFormatter<StrongStructure>();
 
+			
+				var buffer = serializer.Serialize(entity);
+				serializer.Deserialize(buffer);
+			
+
+			Thread.Sleep(2500);
+
 			var watch = Stopwatch.StartNew();
 
 			for (int i = 0; i < 1000; i++)
 			{
-				var buffer = serializer.Serialize(entity);
 				serializer.Deserialize(buffer);
 			}
 			watch.Stop();
 
 			long ms = watch.ElapsedMilliseconds;
 
-			var protoBuf = Stopwatch.StartNew();
+			
 
-			{
-				var buffer = ProtoBufHelper.ProtoSerialize(entity);
-				var obj = ProtoBufHelper.ProtoDeserialize<StrongStructure>(buffer);
-			}
+		    var protoBuffer = ProtoBufHelper.ProtoSerialize(entity);
+			
+
+			var protoBuf = Stopwatch.StartNew();
 
 			for (int i = 0; i < 1000; i++)
 			{
-				var buffer = ProtoBufHelper.ProtoSerialize(entity);
-				var obj = ProtoBufHelper.ProtoDeserialize<StrongStructure>(buffer);
+				var obj = ProtoBufHelper.ProtoDeserialize<StrongStructure>(protoBuffer);
 			}
 			protoBuf.Stop();
 

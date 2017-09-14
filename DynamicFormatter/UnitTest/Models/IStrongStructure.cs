@@ -47,6 +47,16 @@ namespace UnitTest.Models
 		[Key(5)]
 		public string[] p6;
 
+		[ProtoMember(7)]
+		[Key(6)]
+		public int[] p7;
+
+		[ProtoMember(8)]
+		[Key(7)]
+		public int[] p8;
+
+		TestEnum e1 = TestEnum.second;
+
 		public StrongStructure()
 		{
 			p1 = false;
@@ -58,6 +68,24 @@ namespace UnitTest.Models
 			{
 				"first element",
 				"Second element"
+			};
+			p7 = new int[]
+			{
+				45,
+				45,
+				4,
+				1,
+				1,
+				5
+			};
+			p8 = new int[]
+			{
+				45,
+				45,
+				4,
+				1,
+				1,
+				5
 			};
 		}
 	}

@@ -32,11 +32,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
@@ -50,6 +50,12 @@
     <Compile Include="Extentions\ReflectionUtils.cs" />
     <Compile Include="Extentions\TypeFinder.cs" />
     <Compile Include="Extentions\Сonstants.cs" />
+    <Compile Include="Generator\Templates\ArrayTypeTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ArrayTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Generator\Templates\ArrayTypeTemplateResolver.cs" />
     <Compile Include="Generator\Templates\BaseModuleTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -69,7 +75,6 @@
     <Compile Include="Serializers\DynamicFormatter.cs" />
     <Compile Include="Serializers\DynamicFormatterT.cs" />
     <Compile Include="Serializers\StrongTypeFormatter.cs" />
-    <Compile Include="Generator\Templates\ReferenceTypeInfoDebugHelper.cs" />
     <Compile Include="Generator\Templates\ReferenceTypeTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -88,6 +93,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Generator\Templates\ArrayTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ArrayTypeTemplate.cs</LastGenOutput>
+    </Content>
     <Content Include="Generator\Templates\BaseModuleTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>BaseModuleTemplate.cs</LastGenOutput>

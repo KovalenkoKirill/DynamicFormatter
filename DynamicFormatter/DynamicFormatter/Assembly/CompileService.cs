@@ -33,8 +33,16 @@ namespace DynamicFormatter.Assembly
 			foreach(var type in targers)
 			{
 				var typeInfo = TypeInfo.instanse(type);
-				var ReferenceTypeTemplate = new ReferenceTypeTemplate(typeInfo);
-				builder.Append(ReferenceTypeTemplate.TransformText());
+				if (typeInfo.IsArray)
+				{
+					var arrayTypeTemplate = new ArrayTypeTemplate(typeInfo);
+					builder.Append(arrayTypeTemplate.TransformText());
+				}
+				else
+				{
+					var ReferenceTypeTemplate = new ReferenceTypeTemplate(typeInfo);
+					builder.Append(ReferenceTypeTemplate.TransformText());
+				}
 			}
 
 			BaseModuleTemplate baseTemplate = new BaseModuleTemplate(builder.ToString());
@@ -44,7 +52,16 @@ namespace DynamicFormatter.Assembly
 
 			foreach(var type in targers)
 			{
-				object obj = results.CompiledAssembly.CreateInstance($"DynamicFormatter.Dynamic.{type.Name}");
+				object obj;
+				if (type.IsArray)
+				{
+					obj = results.CompiledAssembly
+								.CreateInstance($"DynamicFormatter.Dynamic.{type.GetElementType().Name}ArrayResolver");
+				}
+				else
+				{
+					obj = results.CompiledAssembly.CreateInstance($"DynamicFormatter.Dynamic.{type.Name}");
+				}
 				var method = obj.GetType().GetMethod("instanse");
 				var desirializeService = (Func<int, DynamicBuffer, Dictionary<int, object>, object>)
 				Delegate.CreateDelegate(

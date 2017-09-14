@@ -79,7 +79,7 @@ namespace UnitTest
 		}
 
 		[TestMethod]
-		public void TestSetterStrongType()
+		public void TestSetterAndGetterStrongType()
 		{
 			JustSimpleClass simple = new JustSimpleClass(10);
 			var genericMembers = simple.GetType().GetMembers(
@@ -93,11 +93,20 @@ BindingFlags.Instance)
 				if (member.FieldType == typeof(int))
 				{
 					var action = CreateInstanceFieldSetterForValueType(member);
+					var getter = CreateInstanceFieldGetter(member);
+					var val = getter(simple);
 					var result = action.Invoke(simple, 90);
 				}
 			}
 		}
-				
+
+		public static Func<JustSimpleClass, int> CreateInstanceFieldGetter(FieldInfo fieldInfo)
+		{
+			ParameterExpression p1 = Expression.Parameter(typeof(JustSimpleClass), "p1");
+			var body = Expression.Field(p1, fieldInfo);
+			var lambda = Expression.Lambda<Func<JustSimpleClass, int>>(body, p1);
+			return lambda.Compile();
+		}
 
 		public static Action<JustSimpleClass, int> CreateInstanceFieldSetter(FieldInfo member)
 		{

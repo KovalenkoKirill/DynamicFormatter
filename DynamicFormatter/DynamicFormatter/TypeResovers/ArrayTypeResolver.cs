@@ -34,7 +34,7 @@ namespace DynamicFormatter.TypeResovers
 				return null;
 			}
 
-			int arrayLenght = BitConverter.ToInt32(buffer.CurrentBuffer, position);
+			int arrayLenght = BaseConvertor.GetInt(buffer.CurrentBuffer, position);
 
 			int padding = sizeof(int);
 

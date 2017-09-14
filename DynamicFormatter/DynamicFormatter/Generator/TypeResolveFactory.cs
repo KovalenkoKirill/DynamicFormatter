@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static DynamicFormatter.Extentions.Сonstants;
+using static DynamicFormatter.Models.DynamicBuffer;
 
 namespace DynamicFormatter.Generator
 {
@@ -50,6 +51,11 @@ namespace DynamicFormatter.Generator
 				return typeInfo.Resolver.Desirialize(offset, buffer, referenceMaping);
 			}
 			return resolver.desirializeService(offset, buffer, referenceMaping);
+		}
+
+		public static byte[] ResolveSerialize(object Entity, DynamicBuffer buff, Dictionary<object, BufferPtr> referenceMaping)
+		{
+			throw new NotImplementedException();
 		}
 
 		/// <summary>

@@ -187,16 +187,18 @@ namespace DynamicFormatter
 				{
 					if (IsPrimitive
 					 || Type == typeof(string)
-					 || isNullable
-					 || IsArray)
+					 || isNullable)
 					{
 						_isCanGenerate = false;
 					}
-					if (IsValueType && !IsHasReference)
+				 	else if (IsValueType && !IsHasReference)
 					{
 						_isCanGenerate = false;
 					}
-					_isCanGenerate = true;
+					else
+					{
+						_isCanGenerate = true;
+					}
 				}
 				return _isCanGenerate.Value;
 			}
@@ -436,10 +438,11 @@ namespace DynamicFormatter
 					var typeInfo = instanse(memberType);
 					if (typeInfo.IsPrimitive  
 						|| typeInfo.Type == typeof(string) 
-						|| typeInfo.isNullable
-						|| typeInfo.IsArray)
+						|| typeInfo.isNullable)
 						continue;
-					if (!memberType.IsValueType || memberType.IsGenericType)
+					if (!memberType.IsValueType 
+					|| memberType.IsGenericType 
+					|| memberType.IsArray)
 					{
 						if(!current.Contains(memberType))
 						{

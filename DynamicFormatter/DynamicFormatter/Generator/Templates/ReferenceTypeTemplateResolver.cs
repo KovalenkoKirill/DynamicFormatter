@@ -26,6 +26,7 @@ namespace DynamicFormatter.Generator.Templates
 		{
 			this.typeInfo = typeInfo;
 			this.className = typeInfo.Type.Name;
+			
 			foreach (var fiels in typeInfo.Fields)
 			{
 				var fieldInfo = TypeInfo.instanse(fiels.FieldType);
@@ -36,10 +37,23 @@ namespace DynamicFormatter.Generator.Templates
 			}
 		}
 
+		private bool isNullable(FieldInfo field)
+		{
+			var typeinfo = TypeInfo.instanse(field.FieldType);
+			return typeinfo.isNullable;
+		}
+
+		private bool isEnum(FieldInfo field)
+		{
+			var typeInfo = TypeInfo.instanse(field.FieldType);
+			return typeInfo.IsEnum;
+		}
+
 		private bool isPrimitive(FieldInfo field)
 		{
 			var typeInfo = TypeInfo.instanse(field.FieldType);
-			return typeInfo.IsPrimitive;
+			return typeInfo.IsPrimitive || 
+			typeInfo.Type == typeof(DateTime) || typeInfo.Type == typeof(Guid);
 		}
 
 		public bool isPrivate(FieldInfo field)
@@ -69,9 +83,16 @@ namespace DynamicFormatter.Generator.Templates
 		/// <returns></returns>
 		private string ValidateName(FieldInfo field)
 		{
+
 			return field.Name.Replace("<", "").Replace(">", "");
 		}
 
+
+		private TypeInfo GetChildType(FieldInfo field)
+		{
+			var typeInfo = TypeInfo.instanse(field.FieldType);
+			return TypeInfo.instanse(typeInfo.Type.GenericTypeArguments[0]);
+		}
 
 		private string FieldFullName(FieldInfo field)
 		{
@@ -84,9 +105,20 @@ namespace DynamicFormatter.Generator.Templates
 			return field.FieldType.FullName;
 		}
 
+		private int SizeInBuffer(FieldInfo field)
+		{
+			var typeInfo = TypeInfo.instanse(field.FieldType);
+			return typeInfo.SizeInBuffer;
+		}
+
 		private string GetTypePrefix(FieldInfo field)
 		{
 			var type = field.FieldType;
+			return GetTypePrefix(type);
+		}
+
+		private string GetTypePrefix(Type type)
+		{
 			if (type == typeof(bool))
 			{
 				return "Bool";
@@ -143,8 +175,13 @@ namespace DynamicFormatter.Generator.Templates
 			{
 				return "Date";
 			}
+			else if (type == typeof(Guid))
+			{
+				return "Guid";
+			}
 			throw new Exception($"Unknown type {type.Name}");
 		}
+
 		private string GetSizeInBuffer(FieldInfo field)
 		{
 			var typeInfo = TypeInfo.instanse(field.FieldType);

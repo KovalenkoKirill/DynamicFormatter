@@ -12,15 +12,16 @@ namespace DynamicFormatter.Generator.Templates
     using System.Linq;
     using System.Text;
     using System.Collections.Generic;
+    using DynamicFormatter.Extentions;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\BaseModuleTemplate.tt"
+    #line 1 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class BaseModuleTemplate : BaseModuleTemplateBase
+    public partial class ArrayTypeTemplate : ArrayTypeTemplateBase
     {
 #line hidden
         /// <summary>
@@ -28,34 +29,174 @@ namespace DynamicFormatter.Generator.Templates
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"using System;
-using DynamicFormatter.interfaces;
-using DynamicFormatter.Generator;
-using DynamicFormatter.Extentions;
-using System.Runtime.Serialization;
-using DynamicFormatter.Models;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-
-
-namespace ");
+            this.Write("\r\n\tpublic class ");
             
-            #line 19 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\BaseModuleTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(this.nameSpace));
+            #line 9 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(this.className));
             
             #line default
             #line hidden
-            this.Write("\r\n{\r\n");
+            this.Write(" :IResolver<");
             
-            #line 21 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\BaseModuleTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(this.content));
+            #line 9 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(typeInfo.Type.FullName));
             
             #line default
             #line hidden
-            this.Write("\r\n}");
+            this.Write(@">
+	{
+		public object instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
+		{
+			byte[] buffer = buff.CurrentBuffer;
+
+			short position = (short)offset == 0 ?
+				 (short)0 : BaseConvertor.GetShort(buffer, offset);
+
+			if (position == -1)
+			{
+				return null;
+			}
+			offset = position;
+
+			int arrayLenght = BaseConvertor.GetInt(buffer, offset);
+
+			");
+            
+            #line 26 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(elementInfo.Type.FullName));
+            
+            #line default
+            #line hidden
+            this.Write("[] array = new ");
+            
+            #line 26 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(elementInfo.Type.FullName));
+            
+            #line default
+            #line hidden
+            this.Write("[arrayLenght];\r\n\r\n\t\t\treferenceMaping.Add(position, array);\r\n\r\n\t\t\toffset += ");
+            
+            #line 30 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(sizeof(int)));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\r\n\t\t\tfor(int i = 0;i<arrayLenght;i++)\r\n\t\t\t{\r\n\t\t\t\t");
+            
+            #line 34 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+if(this.isPrimitive())
+				{
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t\t\tarray[i] = BaseConvertor.Get");
+            
+            #line 36 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(this.Prefix));
+            
+            #line default
+            #line hidden
+            this.Write("(buffer, offset);\r\n\t\t\t\t\toffset += ");
+            
+            #line 37 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(this.elementInfo.SizeInBuffer));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\t\t\t\t");
+            
+            #line 38 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+}
+				else if(this.elementInfo.Type == typeof(string))
+				{
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t\t\tarray[i] = DesirializeString(offset,buff,referenceMaping);\r\n\t\t\t\t\toffset += ");
+            
+            #line 42 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(sizeof(ushort)));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\t\t\t\t");
+            
+            #line 43 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+}
+				else
+				{
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t\t\tarray[i] = (");
+            
+            #line 46 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(elementInfo.Type.FullName));
+            
+            #line default
+            #line hidden
+            this.Write(")TypeResolveFactory.ResolveDesirialize(typeof(");
+            
+            #line 46 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(elementInfo.Type.FullName));
+            
+            #line default
+            #line hidden
+            this.Write("),\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\toffset,\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tbuff,\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\treferen" +
+                    "ceMaping);\r\n\t\t\t\t\toffset += ");
+            
+            #line 50 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(this.elementInfo.SizeInBuffer));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\t\t\t\t");
+            
+            #line 51 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+}
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t}\r\n\t\t\treturn array;\r\n\t\t}\r\n\r\n\t\t");
+            
+            #line 56 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+if(this.elementInfo.Type == typeof(string))
+		{
+            
+            #line default
+            #line hidden
+            this.Write(@"		public unsafe string DesirializeString(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
+		{
+			fixed (byte* buf = buffer.CurrentBuffer)
+			{
+				short position = offset == 0 ? (short)0 : *(short*)(buf + offset);
+				if (position == -1)
+				{
+					return null;
+				}
+				if (referenceMaping.ContainsKey(position))
+				{
+					return referenceMaping[position] as string;
+				}
+				int lenght = *(int*)(buf + position);
+
+				fixed (char* charP = new char[lenght])
+				{
+					int bytesForCopy = sizeof(char) * lenght;
+					byte* source = (buf + position + sizeof(int));
+					Buffer.MemoryCopy(source, charP, bytesForCopy, bytesForCopy);
+					return new String(charP);
+				}
+			}
+		}
+		");
+            
+            #line 82 "C:\Users\Kirill\Documents\DynamicFormatter\DynamicFormatter\DynamicFormatter\Generator\Templates\ArrayTypeTemplate.tt"
+}
+            
+            #line default
+            #line hidden
+            this.Write("\t}\r\n");
             return this.GenerationEnvironment.ToString();
         }
     }
@@ -67,7 +208,7 @@ namespace ");
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class BaseModuleTemplateBase
+    public class ArrayTypeTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

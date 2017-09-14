@@ -20,9 +20,11 @@
 			else
 			{#>
 				public Action<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>> Setter_<#=this.ValidateName(field)#>;
+			<#}#>
 
-			<#}
-		}
+			public Func<<#=typeInfo.Type.FullName#>,<#=this.FieldFullName(field)#>> Getter_<#=this.ValidateName(field)#>;
+
+		<#}
 		
 	 }#>
 		
@@ -35,8 +37,14 @@
 			<#foreach(var field in this.typeInfo.Fields)
 			{
 				if(this.isPrivate(field))
-				{
-							if(!this.typeInfo.IsValueType)
+				{#>
+							{
+											ParameterExpression p1 = Expression.Parameter(typeof(<#=typeInfo.Type.FullName#>), "p1");
+											var body = Expression.Field(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+											var lambda = Expression.Lambda<Func<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>>>(body, p1);
+											Getter_<#=this.ValidateName(field)#> = lambda.Compile();
+							}
+							<#if(!this.typeInfo.IsValueType)
 							{#>
 								
 								{
@@ -93,6 +101,59 @@
 
 		}
 
+
+		public unsafe byte[] Serialize(object Entity, DynamicBuffer buff, Dictionary<object, DynamicBuffer.BufferPtr> referenceMaping)
+		{
+			if (Entity == null)
+			{
+				return BitConverter.GetBytes(((short)-1));
+			}
+			DynamicBuffer.BufferPtr ptr;
+			if (referenceMaping.TryGetValue(Entity,out ptr))
+			{
+				return BitConverter.GetBytes(ptr.position);
+			}
+			ptr = buff.Alloc(<#=this.typeInfo.Size#>);
+			short position = ptr.position;
+			int offset = (int)position;
+			byte[] buffer = buff.CurrentBuffer;
+
+			<#=typeInfo.Type.FullName#> entity = (<#=typeInfo.Type.FullName#>)Entity;
+
+			<#foreach(var field in this.typeInfo.Fields)
+			{#>
+				{
+					<#=this.FieldFullName(field)#> value = <#
+
+					if(this.isPrivate(field))
+					{#>
+						Getter_<#=this.ValidateName(field)#>(entity);
+					<#}
+					else
+					{#>
+						entity.<#=this.ValidateName(field)#>;
+					<#}
+					#>
+
+					<#if(this.isPrimitive(field))
+					{#>
+						BaseConvertor.Write<#=this.SizeInBuffer(field) * 8#>(buffer,offset,(byte*)&value);
+					<#}
+					else
+					{#>
+						byte[] result = TypeResolveFactory.ResolveSerialize((object)value,buff,referenceMaping);
+						System.Buffer.BlockCopy(result, 0, buffer, offset, result.Length);
+					<#}#>
+
+					offset += <#=this.SizeInBuffer(field)#>;
+
+				}
+			<#}#>
+
+			return BitConverter.GetBytes(position);
+		}
+
+
 		public object instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
 		{
 			byte[] buffer = buff.CurrentBuffer;
@@ -104,9 +165,14 @@
 			{
 				return null;
 			}
+			if(referenceMaping.ContainsKey(position))
+			{
+				return referenceMaping[position];
+			}
 			offset = position;
 
 			var entity = (<#=typeInfo.Type.FullName#>)FormatterServices.GetSafeUninitializedObject(typeof(<#=typeInfo.Type.FullName#>));
+			referenceMaping.Add(position, entity);
 			offset++;
 			<#foreach(var field in this.typeInfo.Fields)
 			{
@@ -147,6 +213,74 @@
 					entity.<#=this.ValidateName(field)#>  = <#=this.ValidateName(field)#>;
 				<#}
 			 }
+			 else if(this.isEnum(field))
+			 {
+				
+					if(this.isPrivate(field))
+					{
+					if(this.typeInfo.IsValueType)
+					{#>
+						entity = Setter_<#=this.ValidateName(field)#>.Invoke(entity,(<#=field.FieldType.FullName#>)BaseConvertor.GetInt(buffer,offset));
+					<#}
+					else
+					{#>
+						Setter_<#=this.ValidateName(field)#>.Invoke(entity,(<#=field.FieldType.FullName#>)BaseConvertor.GetInt(buffer,offset));
+					<#}
+				}
+				else
+				{#>
+					entity.<#=this.ValidateName(field)#>  =  (<#=field.FieldType.FullName#>)BaseConvertor.GetInt(buffer,offset);
+				<#}	
+				
+			 }
+			 else if(this.isNullable(field))
+			 {#>
+				{
+				<#=this.FieldFullName(field)#> fieldValue = null;
+					short ptrToNullable = BaseConvertor.GetShort(buffer, offset);
+					bool hasValue = BaseConvertor.GetBool(buffer,ptrToNullable);
+					if(hasValue)
+					{
+						<#var nullableTypeInfo = GetChildType(field);
+						if(nullableTypeInfo.IsPrimitive || 
+						nullableTypeInfo.Type == typeof(DateTime) || nullableTypeInfo.Type == typeof(Guid))
+						{#>
+
+						fieldValue = BaseConvertor.Get<#=this.GetTypePrefix(nullableTypeInfo.Type)#>(buffer,ptrToNullable +1);
+
+						<#}
+						else
+						{#>
+						fieldValue =  (<#=this.FieldFullName(field)#>)TypeResolveFactory.ResolveDesirialize(
+																		typeof(<#=this.FieldFullName(field)#>),
+																		offset,
+																		buff,
+																		referenceMaping);
+						<#}#>
+
+						
+
+
+					<#if(this.isPrivate(field))
+					{
+						if(this.typeInfo.IsValueType)
+						{#>
+							entity = Setter_<#=this.ValidateName(field)#>.Invoke(entity,fieldValue);
+						<#}
+						else
+						{#>
+							Setter_<#=this.ValidateName(field)#>.Invoke(entity,fieldValue);
+						<#}
+					}
+					else
+					{#>
+							entity.<#=this.ValidateName(field)#> = fieldValue;
+					<#}#>
+					
+					}
+				}
+
+			 <#}
 			 else
 			 {#>
 				
