@@ -5,24 +5,24 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="DynamicFormatter.Extentions" #>
 <#@ import namespace="DynamicFormatter.Extentions" #>
-	public class <#= this.className #> :IResolver<<#=typeInfo.Type.FullName#>>
+	public class <#= this.className #> :IResolver<<#=this.TypeName()#>>
 	{
 	<#foreach(var field in this.typeInfo.Fields)
 	  {
-		if(this.isPrivate(field))
+		if(this.isPrivate(field) || this.isPrivate())
 		{
 
 			if(this.typeInfo.IsValueType)
 			{#>
-				Func<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>, <#=typeInfo.Type.FullName#>> Setter_<#=this.ValidateName(field)#>;
+				Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>, <#=this.TypeName()#>> Setter_<#=this.ValidateName(field)#>;
 
 			<#}
 			else
 			{#>
-				public Action<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>> Setter_<#=this.ValidateName(field)#>;
+				public Action<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>> Setter_<#=this.ValidateName(field)#>;
 			<#}#>
 
-			public Func<<#=typeInfo.Type.FullName#>,<#=this.FieldFullName(field)#>> Getter_<#=this.ValidateName(field)#>;
+			public Func<<#=this.TypeName()#>,<#=this.FieldFullName(field)#>> Getter_<#=this.ValidateName(field)#>;
 
 		<#}
 		
@@ -32,28 +32,92 @@
 
 		public <#= this.className #>()
 		{
-			this.typeInfo = TypeInfo.instanse(typeof(<#=typeInfo.Type.FullName#>));
+			<#if(!this.isPrivate())
+			{#>
+				this.typeInfo = TypeInfo.instanse(typeof(<#=this.TypeName()#>));
+			<#}
+			else
+			{#>
+				this.typeInfo = TypeInfo.instanse(<#=this.GetHash(this.typeInfo.Type)#>);
+			<#}#>
 
 			<#foreach(var field in this.typeInfo.Fields)
 			{
-				if(this.isPrivate(field))
+				if(this.isPrivate())
+				{#>
+					{
+											ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
+											var body = Expression.Field(Expression.Convert(p1, this.typeInfo.Type), this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+											var lambda = Expression.Lambda<Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1);
+											Getter_<#=this.ValidateName(field)#> = lambda.Compile();
+					}
+
+					<#if(!this.typeInfo.IsValueType)
+					{#>
+										{
+										ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
+										ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
+
+										var m1 = Expression.MakeMemberAccess(Expression.Convert(p1,this.typeInfo.Type), this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+										BinaryExpression body = Expression.Assign(m1, p2);
+										var lambda = Expression.Lambda<Action<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1, p2);
+										Setter_<#=this.ValidateName(field)#> = lambda.Compile();
+										}
+					<#}
+					else
+					{#>
+										{
+												ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
+												ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
+												ParameterExpression SturctObjectParam = Expression.Variable(this.typeInfo.Type, "Struct");
+												ParameterExpression retObjectParam = Expression.Variable(typeof(<#=this.TypeName()#>), "ret");
+
+												LabelTarget returnTarget = Expression.Label(typeof(<#=this.TypeName()#>));
+
+
+												var assignToRet = Expression.Assign(SturctObjectParam, Expression.Convert(p1,this.typeInfo.Type));
+												var makeMeberAccess = Expression.MakeMemberAccess(SturctObjectParam, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+
+												var assign = Expression.Assign(makeMeberAccess, p2);
+												var assingnToResult = Expression.Assign(
+																				retObjectParam,
+																				 Expression.Convert(SturctObjectParam,typeof(object)));
+
+												GotoExpression returnExpression = Expression.Return(returnTarget,
+																								retObjectParam, typeof(<#=this.TypeName()#>));
+
+												LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
+
+												BlockExpression block = Expression.Block(
+																						new ParameterExpression[] { SturctObjectParam, retObjectParam },
+																						assignToRet,
+																						assign,
+																						assingnToResult,
+																						returnExpression,
+																						returnLabel);
+												var lambda = Expression.Lambda<Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>, <#=this.TypeName()#>>>(block, p1, p2);
+												Setter_<#=this.ValidateName(field)#> = lambda.Compile();
+										}
+					<#}#>
+				<#}
+				else if(this.isPrivate(field))
 				{#>
 							{
-											ParameterExpression p1 = Expression.Parameter(typeof(<#=typeInfo.Type.FullName#>), "p1");
+											ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
 											var body = Expression.Field(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
-											var lambda = Expression.Lambda<Func<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>>>(body, p1);
+											var lambda = Expression.Lambda<Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1);
 											Getter_<#=this.ValidateName(field)#> = lambda.Compile();
 							}
 							<#if(!this.typeInfo.IsValueType)
 							{#>
 								
 								{
-										ParameterExpression p1 = Expression.Parameter(typeof(<#=typeInfo.Type.FullName#>), "p1");
+										ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
 										ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
 
 										var m1 = Expression.MakeMemberAccess(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
 										BinaryExpression body = Expression.Assign(m1, p2);
-										var lambda = Expression.Lambda<Action<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>>>(body, p1, p2);
+										var lambda = Expression.Lambda<Action<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1, p2);
 										Setter_<#=this.ValidateName(field)#> = lambda.Compile();
 								}
 
@@ -62,12 +126,12 @@
 							{#>
 
 							{
-								ParameterExpression p1 = Expression.Parameter(typeof(<#=typeInfo.Type.FullName#>), "p1");
+								ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
 								ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
-								ParameterExpression SturctObjectParam = Expression.Variable(typeof(<#=typeInfo.Type.FullName#>), "Struct");
-								ParameterExpression retObjectParam = Expression.Variable(typeof(<#=typeInfo.Type.FullName#>), "ret");
+								ParameterExpression SturctObjectParam = Expression.Variable(typeof(<#=this.TypeName()#>), "Struct");
+								ParameterExpression retObjectParam = Expression.Variable(typeof(<#=this.TypeName()#>), "ret");
 
-								LabelTarget returnTarget = Expression.Label(typeof(<#=typeInfo.Type.FullName#>));
+								LabelTarget returnTarget = Expression.Label(typeof(<#=this.TypeName()#>));
 
 
 								var assignToRet = Expression.Assign(SturctObjectParam, p1);
@@ -79,7 +143,7 @@
 																(SturctObjectParam));
 
 								GotoExpression returnExpression = Expression.Return(returnTarget,
-																				retObjectParam, typeof(<#=typeInfo.Type.FullName#>));
+																				retObjectParam, typeof(<#=this.TypeName()#>));
 
 								LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
 
@@ -90,7 +154,7 @@
 																		assingnToResult,
 																		returnExpression,
 																		returnLabel);
-								var lambda = Expression.Lambda<Func<<#=typeInfo.Type.FullName#>, <#=this.FieldFullName(field)#>, <#=typeInfo.Type.FullName#>>>(block, p1, p2);
+								var lambda = Expression.Lambda<Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>, <#=this.TypeName()#>>>(block, p1, p2);
 								Setter_<#=this.ValidateName(field)#> = lambda.Compile();
 							}
 
@@ -118,7 +182,7 @@
 			int offset = (int)position;
 			byte[] buffer = buff.CurrentBuffer;
 
-			<#=typeInfo.Type.FullName#> entity = (<#=typeInfo.Type.FullName#>)Entity;
+			<#=this.TypeName()#> entity = (<#=this.TypeName()#>)Entity;
 
 			<#foreach(var field in this.typeInfo.Fields)
 			{#>
@@ -171,7 +235,7 @@
 			}
 			offset = position;
 
-			var entity = (<#=typeInfo.Type.FullName#>)FormatterServices.GetSafeUninitializedObject(typeof(<#=typeInfo.Type.FullName#>));
+			var entity = (<#=this.TypeName()#>)FormatterServices.GetSafeUninitializedObject(this.typeInfo.Type);
 			referenceMaping.Add(position, entity);
 			offset++;
 			<#foreach(var field in this.typeInfo.Fields)

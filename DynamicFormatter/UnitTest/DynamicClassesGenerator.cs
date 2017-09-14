@@ -30,7 +30,9 @@ namespace UnitTest
 			var result = CompileService.Compile(new List<Type>()
 			{
 				typeof(JustSimpleClass),
-				typeof(SecondSimpleClass)
+				typeof(SecondSimpleClass),
+				typeof(StrongStructure),
+				typeof(c2)
 			}).ToList();
 
 			Assert.IsTrue(result.Any());

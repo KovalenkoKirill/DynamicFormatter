@@ -178,7 +178,7 @@ namespace UnitTest.Models
 
 		[ProtoMember(17)]
 		[Key(15)]
-		public c2 p16 { get; set; }
+		c2 p16 { get; set; }
 
 		[ProtoMember(18)]
 		[Key(16)]
@@ -188,9 +188,9 @@ namespace UnitTest.Models
 	[Serializable]
 	[ProtoContract(SkipConstructor = true)]
 	[MessagePackObject]
-	public class c2
+	struct c2
 	{
-		public c2()
+		public c2(int z)
 		{
 			p1 = "some string in p1";
 			p2 = "some string in p1";

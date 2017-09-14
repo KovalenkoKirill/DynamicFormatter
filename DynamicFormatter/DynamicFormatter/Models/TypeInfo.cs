@@ -32,6 +32,11 @@ namespace DynamicFormatter
 			return typeInfo;
 		}
 
+		public static TypeInfo instanse(int id)
+		{
+			return typeInfoDictionary[id];
+		}
+
 		#endregion instanse
 
 		#region StaticConstuctor

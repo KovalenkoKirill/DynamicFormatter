@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -30,6 +31,7 @@ namespace UnitTest
 		[TestMethod]
 		public void AdebugTest()
 		{
+
 			var entity = new StrongStructure();
 
 			var serializer = new DynamicFormatter<StrongStructure>();
@@ -48,6 +50,38 @@ namespace UnitTest
 			}
 		}
 
+		//public void gen()
+		//{
+		//	ParameterExpression p1 = Expression.Parameter(typeof(object), "p1");
+		//	ParameterExpression p2 = Expression.Parameter(typeof(System.String), "p2");
+		//	ParameterExpression SturctObjectParam = Expression.Variable(typeof(object), "Struct");
+		//	ParameterExpression retObjectParam = Expression.Variable(typeof(object), "ret");
+
+		//	LabelTarget returnTarget = Expression.Label(typeof(object));
+
+
+		//	var assignToRet = Expression.Assign(SturctObjectParam, Expression.Convert(p1, typeInfo.Type));
+		//	var makeMeberAccess = Expression.MakeMemberAccess(SturctObjectParam, typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) == 45941824));
+
+		//	var assign = Expression.Assign(makeMeberAccess, p2);
+		//	var assingnToResult = Expression.Assign(
+		//									retObjectParam,
+		//									(SturctObjectParam));
+
+		//	GotoExpression returnExpression = Expression.Return(returnTarget,
+		//													retObjectParam, typeof(object));
+
+		//	LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
+
+		//	BlockExpression block = Expression.Block(
+		//											new ParameterExpression[] { SturctObjectParam, retObjectParam },
+		//											assignToRet,
+		//											assign,
+		//											assingnToResult,
+		//											returnExpression,
+		//											returnLabel);
+		//	var lambda = Expression.Lambda<Func<object, System.String, object>>(block, p1, p2);
+		//}
 #else
 
 		[TestMethod]

@@ -100,11 +100,11 @@ BindingFlags.Instance)
 			}
 		}
 
-		public static Func<JustSimpleClass, int> CreateInstanceFieldGetter(FieldInfo fieldInfo)
+		public static Func<object, int> CreateInstanceFieldGetter(FieldInfo fieldInfo)
 		{
-			ParameterExpression p1 = Expression.Parameter(typeof(JustSimpleClass), "p1");
-			var body = Expression.Field(p1, fieldInfo);
-			var lambda = Expression.Lambda<Func<JustSimpleClass, int>>(body, p1);
+			ParameterExpression p1 = Expression.Parameter(typeof(object), "p1");
+			var body = Expression.Field(Expression.Convert(p1, fieldInfo.DeclaringType), fieldInfo);
+			var lambda = Expression.Lambda<Func<object, int>>(body, p1);
 			return lambda.Compile();
 		}
 

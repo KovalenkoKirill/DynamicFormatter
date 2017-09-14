@@ -37,6 +37,35 @@ namespace DynamicFormatter.Generator.Templates
 			}
 		}
 
+		private bool isPrivate()
+		{
+			return isPrivateClass(typeInfo.Type);
+		}
+
+		private bool isPrivateClass(Type type)
+		{
+			return !type.IsPublic;
+		}
+
+		private string TypeName()
+		{
+			if(isPrivateClass(this.typeInfo.Type))
+			{
+				return "object";
+			}
+			return typeInfo.Type.FullName;
+		}
+
+		private string FieldTypeOf(FieldInfo field)
+		{
+			var typeInfo = TypeInfo.instanse(field.FieldType);
+			if (isPrivateClass(field.FieldType) || typeInfo.isNullable)
+			{
+				return $"TypeInfo.instanse({GetHash(field.FieldType).ToString()}).Type";
+			}
+			return $"typeof({field.FieldType.FullName})";
+		}
+
 		private bool isNullable(FieldInfo field)
 		{
 			var typeinfo = TypeInfo.instanse(field.FieldType);
@@ -75,6 +104,10 @@ namespace DynamicFormatter.Generator.Templates
 		{
 			return RuntimeHelpers.GetHashCode(field);
 		}
+		public int GetHash(Type type)
+		{
+			return RuntimeHelpers.GetHashCode(type);
+		}
 
 		/// <summary>
 		/// Validate for property
@@ -97,6 +130,10 @@ namespace DynamicFormatter.Generator.Templates
 		private string FieldFullName(FieldInfo field)
 		{
 			var typeInfo = TypeInfo.instanse(field.FieldType);
+			if(isPrivateClass(typeInfo.Type))
+			{
+				return "object";
+			}
 			if (typeInfo.isNullable)
 			{
 				var memberType = typeInfo.Type.GenericTypeArguments[0];
