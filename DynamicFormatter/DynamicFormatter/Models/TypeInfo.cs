@@ -176,7 +176,7 @@ namespace DynamicFormatter
 		#region Property
 
 
-		internal ITypeResolver Resolver
+		public ITypeResolver Resolver
 		{
 			get
 			{

@@ -8,6 +8,100 @@
 
 	public class <#= this.className #> :IResolver<<#=typeInfo.Type.FullName#>>
 	{
+		public unsafe byte[] Serialize(object Entity, DynamicBuffer buff, Dictionary<object, DynamicBuffer.BufferPtr> referenceMaping)
+		{
+			int size = <#=sizeof(int)#>;
+
+			if (Entity == null)
+			{
+				return BitConverter.GetBytes((short)-1);
+			}
+
+			if(referenceMaping.ContainsKey(Entity))
+			{
+				return BitConverter.GetBytes(referenceMaping[Entity].position);
+			}
+
+			<#=elementInfo.Type.FullName#>[] array = (<#=elementInfo.Type.FullName#>[])Entity;
+
+			size += <#=elementInfo.SizeInBuffer#> * array.Length;
+
+			var ptr = buff.Alloc(size);
+
+			byte[] buffer = buff.CurrentBuffer;
+
+			referenceMaping.Add(Entity, ptr);
+			
+			int offset = ptr.position;
+
+			BaseConvertor.Write32(buffer,offset,(byte*)array.Length);
+
+			offset += <#=sizeof(int)#>;
+
+			for(int i = 0;i<array.Length;i++)
+			{
+				<#=elementInfo.Type.FullName#> value = array[i];
+
+
+					<#if(this.isPrimitive())
+					{#>
+						BaseConvertor.Write<#=elementInfo.SizeInBuffer * 8#>(buffer,offset,(byte*)&value);
+					<#}
+					else if(this.elementInfo.Type == typeof(string))
+					{#>
+						byte[] result = SerializeString(value,buff,referenceMaping);
+						System.Buffer.BlockCopy(result, 0, buffer, offset, result.Length);
+					<#}
+					else
+					{#>
+						byte[] result = TypeResolveFactory.ResolveSerialize(<#=this.GetHash(elementInfo.Type)#>,value,buff,referenceMaping);
+						System.Buffer.BlockCopy(result, 0, buffer, offset, result.Length);
+					<#}#>
+
+
+				offset += <#=this.elementInfo.SizeInBuffer#>;
+			}
+
+			 return BitConverter.GetBytes(ptr.position);
+		}
+
+		<#if(this.elementInfo.Type == typeof(string))
+		{#>
+			public unsafe byte[] SerializeString(object Entity, DynamicBuffer buf, Dictionary<object, DynamicBuffer.BufferPtr> referenceMaping)
+		{
+			if (Entity == null)
+			{
+				return BitConverter.GetBytes((short)-1);
+			}
+			if (referenceMaping.ContainsKey(Entity))
+			{
+				var bufferPtr = referenceMaping[Entity];
+				return BitConverter.GetBytes(bufferPtr.position);
+			}
+			int charSize = sizeof(char);
+			string entity = (string)Entity;
+			int size = charSize * entity.Length + sizeof(int);
+			var ptr = buf.Alloc(size);
+			byte[] buffer = buf.CurrentBuffer;
+			int offset = ptr.position;
+
+			int lenght = entity.Length;
+
+			BaseConvertor.Write32(buffer, offset, (byte*)&lenght);
+
+			offset += sizeof(int);
+
+			fixed (char* str = entity)
+			fixed(byte* bufferPtr = buffer)
+			{
+				int bytesToCopy = charSize * entity.Length;
+				Buffer.MemoryCopy(str, bufferPtr + offset, bytesToCopy, bytesToCopy);
+			}
+
+			return BitConverter.GetBytes(ptr.position);
+		}
+		<#}#>
+
 		public object instanse(int offset, DynamicBuffer buff, Dictionary<int, object> referenceMaping)
 		{
 			byte[] buffer = buff.CurrentBuffer;

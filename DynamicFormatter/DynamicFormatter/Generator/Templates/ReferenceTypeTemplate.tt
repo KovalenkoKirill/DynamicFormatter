@@ -47,7 +47,7 @@
 				{#>
 					{
 											ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
-											var body = Expression.Field(Expression.Convert(p1, this.typeInfo.Type), this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+											Expression body = Expression.Field(Expression.Convert(p1, this.typeInfo.Type), this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
 											var lambda = Expression.Lambda<Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1);
 											Getter_<#=this.ValidateName(field)#> = lambda.Compile();
 					}
@@ -59,7 +59,7 @@
 										ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
 
 										var m1 = Expression.MakeMemberAccess(Expression.Convert(p1,this.typeInfo.Type), this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
-										BinaryExpression body = Expression.Assign(m1, p2);
+										Expression body = Expression.Assign(m1,Expression.Convert(p2,Typeinfo.instanse(<#=this.GetHash(field.FieldType)#>).Type));
 										var lambda = Expression.Lambda<Action<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1, p2);
 										Setter_<#=this.ValidateName(field)#> = lambda.Compile();
 										}
@@ -104,7 +104,11 @@
 				{#>
 							{
 											ParameterExpression p1 = Expression.Parameter(typeof(<#=this.TypeName()#>), "p1");
-											var body = Expression.Field(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+											Expression body = Expression.Field(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
+											<#if(this.isPrivateClass(field.FieldType))
+											{#>
+											body = Expression.Convert(body,typeof(object));
+											<#}#>
 											var lambda = Expression.Lambda<Func<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1);
 											Getter_<#=this.ValidateName(field)#> = lambda.Compile();
 							}
@@ -116,7 +120,15 @@
 										ParameterExpression p2 = Expression.Parameter(typeof(<#=this.FieldFullName(field)#>), "p2");
 
 										var m1 = Expression.MakeMemberAccess(p1, this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>));
-										BinaryExpression body = Expression.Assign(m1, p2);
+										<#if(this.isPrivateClass(field.FieldType))
+										{#>
+											BinaryExpression body = Expression.Assign(m1, Expression.Convert(p2,this.typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) ==<#=this.GetHash(field)#>).FieldType));
+										<#}
+										else
+										{#>
+											BinaryExpression body = Expression.Assign(m1, p2);
+										<#}#>
+										
 										var lambda = Expression.Lambda<Action<<#=this.TypeName()#>, <#=this.FieldFullName(field)#>>>(body, p1, p2);
 										Setter_<#=this.ValidateName(field)#> = lambda.Compile();
 								}
@@ -205,7 +217,7 @@
 					<#}
 					else
 					{#>
-						byte[] result = TypeResolveFactory.ResolveSerialize((object)value,buff,referenceMaping);
+						byte[] result = TypeResolveFactory.ResolveSerialize(<#=this.GetHash(field.FieldType)#>,value,buff,referenceMaping);
 						System.Buffer.BlockCopy(result, 0, buffer, offset, result.Length);
 					<#}#>
 
@@ -315,8 +327,10 @@
 						<#}
 						else
 						{#>
+
+
 						fieldValue =  (<#=this.FieldFullName(field)#>)TypeResolveFactory.ResolveDesirialize(
-																		typeof(<#=this.FieldFullName(field)#>),
+																		<#=this.GetHash(field.FieldType)#>,
 																		offset,
 																		buff,
 																		referenceMaping);
@@ -349,7 +363,7 @@
 			 {#>
 				
 					<#=this.FieldFullName(field)#> <#=this.ValidateName(field)#>_Result =(<#=this.FieldFullName(field)#>) TypeResolveFactory.ResolveDesirialize(
-																		typeof(<#=this.FieldFullName(field)#>),
+																		<#=this.GetHash(field.FieldType)#>,
 																		offset,
 																		buff,
 																		referenceMaping);
@@ -378,8 +392,12 @@
 
 			<#if(this.typeInfo.IsValueType)
 			{
-				#>return (object)entity;<#
+				#>
+				return (object)entity;
+				<#
 			}#>
+
+
 
 			<#if(!this.typeInfo.IsValueType)
 			{

@@ -72,6 +72,10 @@ namespace DynamicFormatter.Serializers
 			var referenceMaping = new Dictionary<object, BufferPtr>();
 			var dynamicBuffer = new DynamicBuffer(_typeInfo.Size * 2);
 			_typeInfo.Resolver.Serialize(entity, dynamicBuffer, referenceMaping);
+			TypeResolveFactory.ResolveSerialize(_typeInfo.Type,
+												 entity,
+												 dynamicBuffer,
+												 referenceMaping);
 			return dynamicBuffer.Buffer;
 		}
 

@@ -28,34 +28,64 @@ namespace DynamicFormatter.Generator
 
 		public static object ResolveDesirialize(Type type,int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
 		{
+			var hash = RuntimeHelpers.GetHashCode(type);
+			return ResolveDesirialize(hash, offset, buffer, referenceMaping);
+		}
+
+		public static object ResolveDesirialize(int hashOfType, int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)
+		{
+			var typeInfo = TypeInfo.instanse(hashOfType);
 			// non dynamic class logic
 			if (!GenerateClass)
 			{
-				var typeInfo = TypeInfo.instanse(type);
 				return typeInfo.Resolver.Desirialize(offset, buffer, referenceMaping);
 			}
 
 			DynamicClassResolver resolver;
-			int hash = RuntimeHelpers.GetHashCode(type);
-			if (!resolvers.TryGetValue(hash, out resolver))
+			if (!resolvers.TryGetValue(hashOfType, out resolver))
 			{
-				var typeInfo = TypeInfo.instanse(type);
-					// task for generate resolver
-					if (typeInfo.IsCanGenerate && !inTask.Contains(hash) && !started)
-					{
+				// task for generate resolver
+				if (typeInfo.IsCanGenerate && !inTask.Contains(hashOfType) && !started)
+				{
 					started = true;
-						Task.Factory.StartNew(() => {
+					Task.Factory.StartNew(() => {
 						GenerateClasses(typeInfo);
 					});
-					}
+				}
 				return typeInfo.Resolver.Desirialize(offset, buffer, referenceMaping);
 			}
 			return resolver.desirializeService(offset, buffer, referenceMaping);
 		}
 
-		public static byte[] ResolveSerialize(object Entity, DynamicBuffer buff, Dictionary<object, BufferPtr> referenceMaping)
+		public static byte[] ResolveSerialize(Type type, object Entity, DynamicBuffer buff, Dictionary<object, BufferPtr> referenceMaping)
 		{
-			throw new NotImplementedException();
+			var hash = RuntimeHelpers.GetHashCode(type);
+			return ResolveSerialize(hash, Entity, buff, referenceMaping);
+		}
+
+		public static byte[] ResolveSerialize(int hashType, object Entity, DynamicBuffer buff, Dictionary<object, BufferPtr> referenceMaping)
+		{
+			var typeInfo = TypeInfo.instanse(hashType);
+			// non dynamic class logic
+			if (!GenerateClass)
+			{
+				return typeInfo.Resolver.Serialize(Entity, buff, referenceMaping);
+			}
+
+			DynamicClassResolver resolver;
+			if (!resolvers.TryGetValue(hashType, out resolver))
+			{
+				// task for generate resolver
+				if (typeInfo.IsCanGenerate && !inTask.Contains(hashType) && !started)
+				{
+					started = true;
+					Task.Factory.StartNew(() => {
+						GenerateClasses(typeInfo);
+					});
+				}
+				return typeInfo.Resolver.Serialize(Entity, buff, referenceMaping);
+			}
+			return resolver.serializeService(Entity, buff, referenceMaping);
 		}
 
 		/// <summary>

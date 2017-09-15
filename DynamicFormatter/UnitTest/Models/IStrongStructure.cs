@@ -112,7 +112,7 @@ namespace UnitTest.Models
 			p13 = "some string in p13";
 			p14 = DateTime.Now;
 			p15 = Guid.NewGuid();
-			p16 = new c2();
+			p16 = new c2(10);
 			p17 = new c3();
 		}
 
@@ -283,6 +283,11 @@ namespace UnitTest.Models
 		[ProtoMember(18)]
 		[Key(17)]
 		public int? p18 { get; set; }
+
+		public override string ToString()
+		{
+			return $"{p1}{p2}{p3}{p4}";
+		}
 	}
 
 	[Serializable]

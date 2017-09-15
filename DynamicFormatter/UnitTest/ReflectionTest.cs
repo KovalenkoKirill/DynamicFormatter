@@ -78,10 +78,46 @@ namespace UnitTest
 
 		}
 
+		public Func<object, int, object> GetSetter(FieldInfo field)
+		{
+			var typeInfo = DynamicFormatter.TypeInfo.instanse(typeof(JustSimpleClass));
+			ParameterExpression p1 = Expression.Parameter(typeof(object), "p1");
+			ParameterExpression p2 = Expression.Parameter(typeof(int), "p2");
+			ParameterExpression SturctObjectParam = Expression.Variable(typeInfo.Type, "Struct");
+			ParameterExpression retObjectParam = Expression.Variable(typeof(object), "ret");
+
+			LabelTarget returnTarget = Expression.Label(typeof(object));
+
+
+			var assignToRet = Expression.Assign(SturctObjectParam, Expression.Convert(p1, typeInfo.Type));
+			var makeMeberAccess = Expression.MakeMemberAccess(SturctObjectParam, field);
+
+			var assign = Expression.Assign(makeMeberAccess, p2);
+			var assingnToResult = Expression.Assign(
+											retObjectParam,
+											 Expression.Convert(SturctObjectParam, typeof(object)));
+
+			GotoExpression returnExpression = Expression.Return(returnTarget,
+															retObjectParam, typeof(object));
+
+			LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
+
+			BlockExpression block = Expression.Block(
+													new ParameterExpression[] { SturctObjectParam, retObjectParam },
+													assignToRet,
+													assign,
+													assingnToResult,
+													returnExpression,
+													returnLabel);
+			var lambda = Expression.Lambda<Func<object, int, object>>(block, p1, p2);
+			return lambda.Compile();
+		}
+
 		[TestMethod]
 		public void TestSetterAndGetterStrongType()
 		{
 			JustSimpleClass simple = new JustSimpleClass(10);
+			var obj = (object)simple;
 			var genericMembers = simple.GetType().GetMembers(
 BindingFlags.NonPublic |
 BindingFlags.Public |
@@ -92,10 +128,10 @@ BindingFlags.Instance)
 			{
 				if (member.FieldType == typeof(int))
 				{
-					var action = CreateInstanceFieldSetterForValueType(member);
+					var action = GetSetter(member);
 					var getter = CreateInstanceFieldGetter(member);
 					var val = getter(simple);
-					var result = action.Invoke(simple, 90);
+					obj = action.Invoke(obj, 90);
 				}
 			}
 		}

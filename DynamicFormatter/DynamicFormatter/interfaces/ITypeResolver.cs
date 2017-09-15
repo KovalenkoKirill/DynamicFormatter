@@ -8,7 +8,7 @@ using static DynamicFormatter.Models.DynamicBuffer;
 
 namespace DynamicFormatter.interfaces
 {
-	internal interface ITypeResolver
+	public interface ITypeResolver
 	{
 		byte[] Serialize(object Entity, DynamicBuffer buffer, Dictionary<object, BufferPtr> referenceMaping);
 

@@ -31,6 +31,7 @@ namespace UnitTest.Models
 			ss = new SecondSimpleClass();
 			azaza = "zzaza";
 		}
+
 	}
 
 	public class SecondSimpleClass

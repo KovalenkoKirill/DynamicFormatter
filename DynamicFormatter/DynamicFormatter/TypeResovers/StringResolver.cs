@@ -16,7 +16,7 @@ namespace DynamicFormatter.TypeResovers
 		{
 		}
 
-		public new byte[] Serialize(object Entity, DynamicBuffer buffer, Dictionary<object, BufferPtr> referenceMaping)
+		public unsafe new byte[] Serialize(object Entity, DynamicBuffer buf, Dictionary<object, BufferPtr> referenceMaping)
 		{
 			if (Entity == null)
 			{
@@ -27,11 +27,27 @@ namespace DynamicFormatter.TypeResovers
 				var bufferPtr = referenceMaping[Entity];
 				return BitConverter.GetBytes(bufferPtr.position);
 			}
-			byte[] ptrBytes = base.Serialize(Entity, buffer, referenceMaping);
-			short ptr = BitConverter.ToInt16(ptrBytes, 0);
-			int lenght = BitConverter.ToInt32(buffer.CurrentBuffer, ptr);
-			referenceMaping.Add(Entity, buffer.GetPtr(ptr, lenght));
-			return ptrBytes;
+			int charSize = sizeof(char);
+			string entity = (string)Entity;
+			int size = charSize * entity.Length + sizeof(int);
+			var ptr = buf.Alloc(size);
+			byte[] buffer = buf.CurrentBuffer;
+			int offset = ptr.position;
+
+			int lenght = entity.Length;
+
+			BaseConvertor.Write32(buffer, offset, (byte*)&lenght);
+
+			offset += sizeof(int);
+
+			fixed (char* str = entity)
+			fixed(byte* bufferPtr = buffer)
+			{
+				int bytesToCopy = charSize * entity.Length;
+				Buffer.MemoryCopy(str, bufferPtr + offset, bytesToCopy, bytesToCopy);
+			}
+
+			return BitConverter.GetBytes(ptr.position);
 		}
 
 		public unsafe new object Desirialize(int offset, DynamicBuffer buffer, Dictionary<int, object> referenceMaping)

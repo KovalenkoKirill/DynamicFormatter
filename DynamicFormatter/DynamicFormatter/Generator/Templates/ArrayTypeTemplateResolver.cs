@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,6 +29,15 @@ namespace DynamicFormatter.Generator.Templates
 			this.elementInfo = TypeInfo.instanse(typeInfo.ElementTypeInfo);
 			this.className = $"{elementInfo.Type.Name}ArrayResolver";
 			this.Prefix = GetTypePrefix();
+		}
+
+		public int GetHash(FieldInfo field)
+		{
+			return RuntimeHelpers.GetHashCode(field);
+		}
+		public int GetHash(Type type)
+		{
+			return RuntimeHelpers.GetHashCode(type);
 		}
 
 		private bool isPrimitive()

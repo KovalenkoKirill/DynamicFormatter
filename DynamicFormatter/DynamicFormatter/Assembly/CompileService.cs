@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DynamicFormatter.Models.DynamicBuffer;
 
 namespace DynamicFormatter.Assembly
 {
@@ -20,6 +21,9 @@ namespace DynamicFormatter.Assembly
 			parameters.GenerateInMemory = true;
 			parameters.ReferencedAssemblies.Add("DynamicFormatter.dll");
 			parameters.ReferencedAssemblies.Add("System.Core.dll");
+#if DEBUG
+			parameters.ReferencedAssemblies.Add("System.dll");
+#endif
 			parameters.CompilerOptions = "/unsafe";
 			var dependensyAssembly = GetDllDependency(targers);
 			foreach(var ddl in dependensyAssembly)
@@ -63,15 +67,23 @@ namespace DynamicFormatter.Assembly
 					obj = results.CompiledAssembly.CreateInstance($"DynamicFormatter.Dynamic.{type.Name}");
 				}
 				var method = obj.GetType().GetMethod("instanse");
+				var serializeMethod = obj.GetType().GetMethod("Serialize");
 				var desirializeService = (Func<int, DynamicBuffer, Dictionary<int, object>, object>)
 				Delegate.CreateDelegate(
 							typeof(Func<int, DynamicBuffer, Dictionary<int, object>, object>),
 							obj, method);
+
+				var serializer = (Func<object, DynamicBuffer, Dictionary<object, BufferPtr>, byte[]>)
+				Delegate.CreateDelegate(
+							typeof(Func<object, DynamicBuffer, Dictionary<object, BufferPtr>, byte[]>),
+							obj, serializeMethod);
+
 				yield return new DynamicClassResolver()
 				{
 					service = obj,
 					type = type,
-					desirializeService = desirializeService
+					desirializeService = desirializeService,
+					serializeService = serializer
 				};
 			}
 		}
@@ -95,6 +107,8 @@ namespace DynamicFormatter.Assembly
 		public Type type { get; set; }
 
 		public Func<int, DynamicBuffer, Dictionary<int, object>, object> desirializeService { get; set; }
+
+		public Func<object,DynamicBuffer, Dictionary<object, BufferPtr>,byte[]> serializeService { get; set; }
 
 		public object service { get; set; }
 	}

@@ -46,42 +46,11 @@ namespace UnitTest
 
 			for (int i = 0; i < 10000; i++)
 			{
+				buffer = serializer.Serialize(entity);
 				desResilt = serializer.Deserialize(buffer);
 			}
+			Thread.Sleep(10000);
 		}
-
-		//public void gen()
-		//{
-		//	ParameterExpression p1 = Expression.Parameter(typeof(object), "p1");
-		//	ParameterExpression p2 = Expression.Parameter(typeof(System.String), "p2");
-		//	ParameterExpression SturctObjectParam = Expression.Variable(typeof(object), "Struct");
-		//	ParameterExpression retObjectParam = Expression.Variable(typeof(object), "ret");
-
-		//	LabelTarget returnTarget = Expression.Label(typeof(object));
-
-
-		//	var assignToRet = Expression.Assign(SturctObjectParam, Expression.Convert(p1, typeInfo.Type));
-		//	var makeMeberAccess = Expression.MakeMemberAccess(SturctObjectParam, typeInfo.Fields.Single(x => RuntimeHelpers.GetHashCode(x) == 45941824));
-
-		//	var assign = Expression.Assign(makeMeberAccess, p2);
-		//	var assingnToResult = Expression.Assign(
-		//									retObjectParam,
-		//									(SturctObjectParam));
-
-		//	GotoExpression returnExpression = Expression.Return(returnTarget,
-		//													retObjectParam, typeof(object));
-
-		//	LabelExpression returnLabel = Expression.Label(returnTarget, retObjectParam);
-
-		//	BlockExpression block = Expression.Block(
-		//											new ParameterExpression[] { SturctObjectParam, retObjectParam },
-		//											assignToRet,
-		//											assign,
-		//											assingnToResult,
-		//											returnExpression,
-		//											returnLabel);
-		//	var lambda = Expression.Lambda<Func<object, System.String, object>>(block, p1, p2);
-		//}
 #else
 
 		[TestMethod]
@@ -169,9 +138,9 @@ namespace UnitTest
 		[TestMethod]
 		public void TestPerfomenceStrongTypeWithProtoBuf()
 		{
-			var entity = new StrongStructure();
+			var entity = new JustSimpleClass(19);
 
-			var serializer = new DynamicFormatter<StrongStructure>();
+			var serializer = new DynamicFormatter<JustSimpleClass>();
 
 			
 				var buffer = serializer.Serialize(entity);
@@ -184,6 +153,7 @@ namespace UnitTest
 
 			for (int i = 0; i < 1000; i++)
 			{
+				buffer = serializer.Serialize(entity);
 				serializer.Deserialize(buffer);
 			}
 			watch.Stop();
@@ -199,7 +169,8 @@ namespace UnitTest
 
 			for (int i = 0; i < 1000; i++)
 			{
-				var obj = ProtoBufHelper.ProtoDeserialize<StrongStructure>(protoBuffer);
+				protoBuffer = ProtoBufHelper.ProtoSerialize<JustSimpleClass>(entity);
+				var obj = ProtoBufHelper.ProtoDeserialize<JustSimpleClass>(protoBuffer);
 			}
 			protoBuf.Stop();
 
